@@ -19,7 +19,7 @@
   },
   "defaults": {
     "build": {
-      "packtool": "vessel sources",
+      "packtool": "/home/tetevi/bin/vessel sources",
       "output": "build"
     },
     "start": {

@@ -2,7 +2,7 @@ import React from "react";
 import { textToColor } from "../utils";
 
 export function ProfilePic({ name, profilePic }) {
-  const profileColor = textToColor(name);
+  // const profileColor = textToColor(name);
 
   return (
     <div className="profile-pic">
@@ -11,7 +11,7 @@ export function ProfilePic({ name, profilePic }) {
       ) : (
         <div
           className="placeholder-profile-pic"
-          style={{ backgroundColor: profileColor }}
+          // style={{ backgroundColor: profileColor }}
           title={name}
         >
           <span className="left-eye" />

@@ -16,6 +16,7 @@ import {
 import backIcon from "../assets/images/icon-back.png";
 import "./Profile.scss";
 import { ProfileInfoPlus, VideoInfo } from "../utils/canister/typings";
+import { getAuth } from "@firebase/auth";
 
 type ProfileByIdParams = {
   userId: string;
@@ -41,7 +42,9 @@ export function Profile({
   const { goBack } = useHistory();
 
   const [userProfile, setUserProfile] = useState<ProfileInfoPlus>();
-  const [profilePic, setProfilePic] = useState("");
+  const [profilePic, setProfilePic] = useState(
+    "https://media.istockphoto.com/photos/video-call-with-family-on-christmas-day-during-pandemic-picture-id1279811647?b=1&k=20&m=1279811647&s=170667a&w=0&h=rbQRU_GoWwMsXjwAqfsCmPnjFJ3m_asYZptJc9jBVyU="
+  );
   const [videoPreview, setVideoPreview] = useState<VideoInfo>();
   const [isLoading, setLoading] = useState(false);
 
@@ -100,17 +103,24 @@ export function Profile({
   }
 
   // @ts-ignore
-  const { userName = "", uploadedVideos = [], followers = [], following = [] } =
-    userProfile ?? {};
-
+  const {
+    userName = "",
+    uploadedVideos = [],
+    followers = [],
+    following = [],
+  } = userProfile ?? {};
+  console.log("user -------------");
+  console.log(getAuth().currentUser?.email);
   return (
     <>
       {!isCurrentUserProfile && (
-        <header id="alt-header">
+        <header style={{ position: "absolute", top: "30px" }} id="alt-header">
           <button id="back" onClick={goBack}>
             <img src={backIcon} alt="Go Back" />
           </button>
-          <h2>{userName}</h2>
+          <h2 style={{ position: "absolute", right: "15px" }}>
+            {getAuth().currentUser?.email}
+          </h2>
           <span> </span>
         </header>
       )}
@@ -136,12 +146,15 @@ export function Profile({
           <h2>
             {isCurrentUserProfile ? (
               <>
-                <span>{userId}</span>
+                <span>{getAuth().currentUser?.email}</span>
                 <br />
                 <button
                   className="btn-link"
                   style={{ fontSize: "1.4rem" }}
-                  onClick={() => onLogOut && onLogOut(history)}
+                  onClick={() => {
+                    getAuth().signOut();
+                    history.push("/sign-in");
+                  }}
                 >
                   Log out
                 </button>

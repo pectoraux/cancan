@@ -1,15 +1,26 @@
-import React, { FormEvent, useEffect, useRef, useState } from "react";
+import React, {
+  FormEvent,
+  useEffect,
+  useContext,
+  useRef,
+  useState,
+} from "react";
 import {
   checkUsername,
   createUser,
   getUserFromCanister,
   getUserNameByPrincipal,
-  useAuth,
+  // useAuth,
+  getFirebase,
+  // useFirebase
+  AuthContext,
 } from "../utils";
 import logo from "../assets/images/cancan-logo.png";
 import { LoadingIndicator } from "./LoadingIndicator";
 import { useHistory } from "react-router";
 import "./SignUp.scss";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { Link } from "react-router-dom";
 
 /*
  * This component receives the authentication information and queries to see if
@@ -25,32 +36,33 @@ export function SignUp() {
   const [isCheckingICForUser, setIsCheckingICForUser] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const usernameInputRef = useRef<HTMLInputElement>(null);
-  const auth = useAuth();
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+  // const auth = getAuth();
   const history = useHistory();
 
   // Get a user name from the user's principal and then fetch the user object
   // with all the user's data. Show a loading message between these async
   // backend calls happening.
-  useEffect(() => {
-    if (!auth.isAuthReady) return;
-    if (auth.isAuthenticated && auth.identity !== undefined) {
-      setIsCheckingICForUser(true);
-      getUserNameByPrincipal(auth.identity.getPrincipal()).then((username) => {
-        if (username) {
-          // User exists! Set user and redirect to /feed.
-          getUserFromCanister(username).then((user) => {
-            setIsCheckingICForUser(false);
-            auth.setUser(user!);
-            history.replace("/feed");
-          });
-          setIsCheckingICForUser(false);
-        } else {
-          // Do nothing. Allow the user to create a userId
-          setIsCheckingICForUser(false);
-        }
-      });
-    }
-  }, [auth.isAuthReady, auth.isAuthenticated, auth.identity]);
+  // useEffect(() => {
+  //   if (!auth.isAuthReady) return;
+  //   if (auth.isAuthenticated && auth.identity !== undefined) {
+  //     setIsCheckingICForUser(true);
+  //     getUserNameByPrincipal(auth.identity.getPrincipal()).then((username) => {
+  //       if (username) {
+  //         // User exists! Set user and redirect to /feed.
+  //         getUserFromCanister(username).then((user) => {
+  //           setIsCheckingICForUser(false);
+  //           auth.setUser(user!);
+  //           history.replace("/feed");
+  //         });
+  //         setIsCheckingICForUser(false);
+  //       } else {
+  //         // Do nothing. Allow the user to create a userId
+  //         setIsCheckingICForUser(false);
+  //       }
+  //     });
+  //   }
+  // }, [auth.isAuthReady, auth.isAuthenticated, auth.identity]);
 
   // Submit the form to signup with a new username, the backend ensures that
   // the username is available.
@@ -61,21 +73,36 @@ export function SignUp() {
 
     // Get the username entered from the form.
     const username = usernameInputRef?.current?.value!;
+    const password = passwordInputRef?.current?.value!;
     setIsSigningIn(true);
     // Check to make sure this username has not been taken. If this user already
     // has a username, it should have signed them in already.
-    const isAvailable = await checkUsername(username);
+    // const isAvailable = true;//await checkUsername(username);
 
-    if (isAvailable) {
-      // Create a user on the backend and assign that user to frontend data.
-      const user = await createUser(username, auth.identity?.getPrincipal());
-      auth.setUser(user);
-      setIsSigningIn(false);
-      history.push("/feed");
-    } else {
-      setError(`Username '${username}' is taken`);
-      setIsSigningIn(false);
-    }
+    // if (isAvailable) {
+    //   // Create a user on the backend and assign that user to frontend data.
+    //   const user = await createUser(username);
+    //   auth.setUser(user);
+    //   setIsSigningIn(false);
+    //   history.push("/feed");
+    // } else {
+    //   setError(`Username '${username}' is not signed up yet. Please sign up here`);
+    //   setIsSigningIn(false);
+    // }
+
+    // let firebaseInstance = getFirebase()
+    // if (firebaseInstance) {
+    //   const auth = getAuth();
+    createUserWithEmailAndPassword(getAuth(), username, password)
+      .then((user) => {
+        setIsSigningIn(false);
+        history.push("/sign-in");
+      })
+      .catch((error) => {
+        setError(`Username '${username}' is taken`);
+        setIsSigningIn(false);
+      });
+    // }
   }
 
   return (
@@ -86,7 +113,7 @@ export function SignUp() {
       />
       <LoadingIndicator
         isLoading={isSigningIn}
-        loadingMessage="Signing in..."
+        loadingMessage="Signing up..."
       />
 
       <form onSubmit={submit}>
@@ -94,8 +121,13 @@ export function SignUp() {
 
         <div className="username-container">
           <label htmlFor="username">
-            <p>Enter a username to get started:</p>
+            <p>Enter a username & password to get started:</p>
           </label>
+          {error !== "" && (
+            <div hidden={error === undefined} className="error">
+              <span className="message">{error}</span>
+            </div>
+          )}
           <input
             ref={usernameInputRef}
             type="text"
@@ -103,16 +135,29 @@ export function SignUp() {
             id="username"
             placeholder="username"
           />
-          {error !== "" && (
-            <div hidden={error === undefined} className="error">
-              <span className="message">{error}</span>
-            </div>
-          )}
+          <input
+            ref={passwordInputRef}
+            type="text"
+            name="password"
+            id="password"
+            placeholder="password"
+          />
         </div>
         <button type="submit" id="sign-in" className="primary medium">
           Sign Up!
         </button>
       </form>
+      <Link
+        style={{
+          color: "red",
+          fontSize: "1.8rem",
+          position: "absolute",
+          top: "30px",
+        }}
+        to="/sign-in"
+      >
+        Sign In.
+      </Link>
     </main>
   );
 }

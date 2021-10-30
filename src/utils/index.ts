@@ -1,11 +1,12 @@
-import { Principal } from "@dfinity/agent";
 import { Optional } from "./canister";
 
-export * from "./CatchAll";
-export * from "./video";
-export * from "./auth";
-export * from "./updateHead";
 export * from "./canister";
+export * from "./updateHead";
+export * from "./video";
+// export * from "./auth";
+export * from "./AuthContext";
+export * from "./AuthProvider";
+export * from "./firebase";
 
 export const KEY_LOCALSTORAGE_USER = `ic-cancan-user`;
 
@@ -24,26 +25,12 @@ export function unwrap<T>(val: Optional<T>): T | null {
   }
 }
 
-export function formatBigNumber(number: number): string {
-  if (number >= 1_000_000_000) {
-    return `${(number / 1_000_000_000).toFixed(2)}B`;
-  }
-  if (number >= 1_000_000) {
-    return `${(number / 1_000_000).toFixed(2)}M`;
-  }
-  if (number >= 1_000) {
-    return `${(number / 1_000).toFixed(1)}K`;
-  }
-  return `${number}`;
-}
-
-// Converts a file from a byteArray to a blob URL
-// TODO: Detect mime-type, "fileToBlobUrl" https://stackoverflow.com/a/29672957
-export function fileToImgSrc(file: [] | number[][], imgType = "jpeg"): string {
-  const byteArray = new Uint8Array(file[0]);
-  const picBlob = new Blob([byteArray], { type: `image/${imgType}` });
-  const picSrc = URL.createObjectURL(picBlob);
-  return picSrc;
+export async function getUserNameByPrincipal() {
+  const icUserName = "tepa";
+  // unwrap<string>(
+  //   await (await CanCan.actor).getUserNameByPrincipal(principal)
+  // )!;
+  return icUserName;
 }
 
 // Converts a word into a hex color for placeholder profile pic backgrounds
@@ -72,24 +59,25 @@ export function textToColor(text: string): string {
   return `#${hexFromNumString}`;
 }
 
-// Regular expressions for detecting canisterId in various formats
-const ic0AppHostRegEx = /(?:(?<canisterId>.*)\.)?(?<subdomain>[^.]*)\.(?<domain>ic0\.app)$/;
-const localhostRegEx = /(?<canisterId>(?:\w{5}-){4}cai)\.[^.]*$/;
-
-// Detect canisterId from current URL
-export function getCanisterId(): Principal {
-  const loc = new URL(window.location.toString());
-  const hostName = loc.hostname;
-  const matchesIc0 = ic0AppHostRegEx.exec(hostName);
-  const matchesLocalhost = localhostRegEx.exec(hostName);
-
-  if (matchesIc0?.groups?.canisterId) {
-    return Principal.fromText(matchesIc0.groups.canisterId);
-  } else if (matchesLocalhost?.groups?.canisterId) {
-    return Principal.fromText(matchesLocalhost.groups.canisterId!);
-  } else if (loc.searchParams.get("canisterId")) {
-    return Principal.fromText(loc.searchParams.get("canisterId")!);
-  } else {
-    throw new Error("Could not find the canister ID.");
+export function formatBigNumber(number: number): string {
+  if (number >= 1_000_000_000) {
+    return `${(number / 1_000_000_000).toFixed(2)}B`;
   }
+  if (number >= 1_000_000) {
+    return `${(number / 1_000_000).toFixed(2)}M`;
+  }
+  if (number >= 1_000) {
+    return `${(number / 1_000).toFixed(1)}K`;
+  }
+  return `${number}`;
+}
+
+// Converts a file from a byteArray to a blob URL
+// TODO: Detect mime-type, "fileToBlobUrl" https://stackoverflow.com/a/29672957
+export function fileToImgSrc(file: [] | number[][], imgType = "jpeg"): string {
+  const byteArray = new Uint8Array(file[0]);
+  const picBlob = new Blob([byteArray], { type: `image/${imgType}` });
+  const picSrc = URL.createObjectURL(picBlob);
+  // return picSrc;
+  return "https://jpeg.org/images/jpeg-home.jpg";
 }

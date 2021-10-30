@@ -10,6 +10,7 @@ import "./Discover.scss";
 interface DiscoverProps {
   profileInfo?: ProfileInfoPlus;
 }
+
 interface VideoInf {
   userId: string;
   name: string;
@@ -70,8 +71,7 @@ export function Discover(props: PropsWithRef<DiscoverProps>) {
   }
 
   useEffect(() => {
-    // if (profileInfo) {
-    if (true) {
+    if (profileInfo) {
       setLoading(true);
       // getSearchVideos(profileInfo.userName, searchTerm.split(/\W+/), [10]).then(
       //   (searchedVideos) => {

@@ -67,9 +67,9 @@ async function uploadVideo(userId: string, file: File, caption: string) {
     byteStart < file.size;
     byteStart += MAX_CHUNK_SIZE, chunk++
   ) {
-    putChunkPromises.push(
-      processAndUploadChunk(videoBuffer, byteStart, file.size, videoId, chunk)
-    );
+    // putChunkPromises.push(
+    //   processAndUploadChunk(videoBuffer, byteStart, file.size, videoId, chunk)
+    // );
   }
 
   await Promise.all(putChunkPromises);
@@ -157,7 +157,7 @@ export function useUploadVideo({ userId }: { userId: string }) {
       console.time("Stored in");
       const video = await uploadVideo(userId, fileToUpload, caption);
 
-      setCompletedVideo(video);
+      // setCompletedVideo(video);
       setReady(false);
       setFile(undefined);
       console.timeEnd("Stored in");

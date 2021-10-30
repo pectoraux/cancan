@@ -57,7 +57,7 @@ section {
 
 main {
   background: linear-gradient(120deg, #51283d -10%, #322a40 110%);
-  padding: 3.8rem 0 9rem;
+  padding: 0.8rem 0 9rem;
 }
 
 button {
@@ -190,12 +190,12 @@ a {
   .error {
     display: block;
     margin: 0 auto;
-    font-size: 24px;
+    font-size: 14px;
     color: red;
   }
 
   img {
-    margin-top: 176px;
+    margin-top: 140px;
   }
 
   form {
@@ -216,9 +216,14 @@ a {
       padding: 16px;
       width: 75%;
       color: #000;
+      margin-bottom: 1%;
     }
     input#username,
     input#username::placeholder {
+      font-size: 24px;
+    }
+    input#password,
+    input#password::placeholder {
       font-size: 24px;
     }
   }
@@ -234,6 +239,15 @@ button#sign-in {
 }
 
 input#username {
+  text-align: center;
+
+  &:focus::placeholder,
+  &:active::placeholder {
+    visibility: hidden;
+  }
+}
+
+input#password {
   text-align: center;
 
   &:focus::placeholder,

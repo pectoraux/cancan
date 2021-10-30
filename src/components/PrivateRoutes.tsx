@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { CSSTransition } from "react-transition-group";
 import { getUserFromCanister } from "../utils";
 import { Feed } from "../views/Feed";
@@ -10,6 +10,8 @@ import { DropDayNotification } from "./DropDayNotification";
 import { RewardShowerNotification } from "./RewardShowerNotification";
 import { MainNav } from "./MainNav";
 import { Redirect, Route, Switch } from "react-router-dom";
+import { AuthContext, getFirebase } from "src/utils";
+import { getAuth } from "@firebase/auth";
 
 function wrapPrivateRouteWithSlide(render) {
   return ({ match }) => (
@@ -32,11 +34,11 @@ export function PrivateRoutes({
   logOut,
 }) {
   function refreshProfileInfo() {
-    getUserFromCanister(user?.userName!).then((user) => {
-      if (user) {
-        setUser(user);
-      }
-    });
+    // getUserFromCanister(user?.userName!).then((user) => {
+    if (user) {
+      setUser(user);
+    }
+    // });
   }
 
   const privateRoutes = [
@@ -54,7 +56,7 @@ export function PrivateRoutes({
     { path: "/rewards", render: () => <Rewards /> },
     {
       path: "/profile",
-      render: () => <Profile currentUser={user} onLogOut={logOut} />,
+      render: () => <Profile currentUser={user} onLogOut={getAuth().signOut} />,
     },
     {
       path: "/profiles/:userId",
@@ -67,10 +69,10 @@ export function PrivateRoutes({
 
   return (
     <Route path={privatePaths}>
-      {isAuthenticated && user ? (
+      {getAuth().currentUser ? (
         <>
           <DropDayNotification />
-          <RewardShowerNotification currentUser={user} />
+          {/* <RewardShowerNotification currentUser={user} /> */}
           <MainNav paths={privatePaths} />
 
           <Switch location={location}>
