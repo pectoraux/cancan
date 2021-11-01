@@ -10,8 +10,9 @@ import { DropDayNotification } from "./DropDayNotification";
 import { RewardShowerNotification } from "./RewardShowerNotification";
 import { MainNav } from "./MainNav";
 import { Redirect, Route, Switch } from "react-router-dom";
-import { AuthContext, getFirebase } from "src/utils";
-import { getAuth } from "@firebase/auth";
+import { AuthContext } from "src/utils";
+// import { getAuth } from "@firebase/auth";
+import { auth } from "src/utils/firebase";
 
 function wrapPrivateRouteWithSlide(render) {
   return ({ match }) => (
@@ -56,7 +57,7 @@ export function PrivateRoutes({
     { path: "/rewards", render: () => <Rewards /> },
     {
       path: "/profile",
-      render: () => <Profile currentUser={user} onLogOut={getAuth().signOut} />,
+      render: () => <Profile currentUser={user} onLogOut={auth.signOut} />,
     },
     {
       path: "/profiles/:userId",
@@ -69,7 +70,7 @@ export function PrivateRoutes({
 
   return (
     <Route path={privatePaths}>
-      {getAuth().currentUser ? (
+      {auth.currentUser ? (
         <>
           <DropDayNotification />
           {/* <RewardShowerNotification currentUser={user} /> */}

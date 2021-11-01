@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
-import { getFirebase, updateHead } from "./utils";
+import { updateHead } from "./utils";
 import { AppRouter } from "./AppRouter";
 import "./styles.scss";
 // import { useFirebase } from "src/utils";

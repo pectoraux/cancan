@@ -16,7 +16,8 @@ import {
 import backIcon from "../assets/images/icon-back.png";
 import "./Profile.scss";
 import { ProfileInfoPlus, VideoInfo } from "../utils/canister/typings";
-import { getAuth } from "@firebase/auth";
+// import { getAuth } from "@firebase/auth";
+import { auth } from "src/utils/firebase";
 
 type ProfileByIdParams = {
   userId: string;
@@ -109,8 +110,6 @@ export function Profile({
     followers = [],
     following = [],
   } = userProfile ?? {};
-  console.log("user -------------");
-  console.log(getAuth().currentUser?.email);
   return (
     <>
       {!isCurrentUserProfile && (
@@ -118,10 +117,6 @@ export function Profile({
           <button id="back" onClick={goBack}>
             <img src={backIcon} alt="Go Back" />
           </button>
-          <h2 style={{ position: "absolute", right: "15px" }}>
-            {getAuth().currentUser?.email}
-          </h2>
-          <span> </span>
         </header>
       )}
       <main>
@@ -144,15 +139,15 @@ export function Profile({
         <div className="profile-header">
           <ProfilePic name={userId} profilePic={profilePic} />
           <h2>
+            <span>{auth.currentUser?.email}</span>
+            <br />
             {isCurrentUserProfile ? (
               <>
-                <span>{getAuth().currentUser?.email}</span>
-                <br />
                 <button
                   className="btn-link"
                   style={{ fontSize: "1.4rem" }}
                   onClick={() => {
-                    getAuth().signOut();
+                    auth.signOut();
                     history.push("/sign-in");
                   }}
                 >

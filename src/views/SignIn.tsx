@@ -12,17 +12,16 @@ import {
   createUser,
   getUserFromCanister,
   getUserNameByPrincipal,
-  // useAuth,
-  getFirebase,
-  // useFirebase
-  // auth,
   AuthContext,
 } from "../utils";
 import logo from "../assets/images/cancan-logo.png";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { useHistory } from "react-router";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+// import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { Link } from "react-router-dom";
+import { auth } from "src/utils/firebase";
+import firebase from "firebase";
+import { SignInWithSocialMedia } from "src/utils/authSocial";
 
 /*
  * The sign-in process for when a user has not yet authenticated with the
@@ -36,15 +35,14 @@ export function SignIn() {
   const passwordInputRef = useRef<HTMLInputElement>(null);
   // const auth = getAuth();
   const history = useHistory();
-
   // If the auth provider has a user (which could be from local storage) and
   // the user is properly authenticated with the identity provider service then
   // send the user to their feed, as they are correctly signed in.
   // useEffect(() => {
-  //   if (auth.user && !auth.identity?.getPrincipal().isAnonymous()) {
+  //   if (token) {
   //     history.replace("/feed");
   //   }
-  // }, [auth.identity, auth.user, history]);
+  // }, [history]);
 
   // Initiates the login flow with the identity provider service, sending the
   // user to a new tab
@@ -60,17 +58,29 @@ export function SignIn() {
     // let firebaseInstance = getFirebase()
     // if (firebaseInstance) {
     //   // const auth = getAuth();
-    signInWithEmailAndPassword(getAuth(), username, password)
-      .then((user) => {
-        getAuth().updateCurrentUser(user.user);
-        setIsSigningIn(false);
+    auth
+      .signInWithEmailAndPassword(username, password)
+      .then((result) => {
         history.push("/feed");
       })
       .catch((error) => {
-        setError(`Error loging in. You need to sign up first`);
         setIsSigningIn(false);
+        setError(error.message);
       });
     // }
+  };
+
+  const signInWIthSocialMedia = (provider: firebase.auth.AuthProvider) => {
+    setError("");
+    setIsSigningIn(true);
+    SignInWithSocialMedia(provider)
+      .then((result) => {
+        history.push("/feed");
+      })
+      .catch((error) => {
+        setIsSigningIn(false);
+        setError(error.message);
+      });
   };
 
   return (

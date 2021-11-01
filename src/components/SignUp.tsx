@@ -11,7 +11,7 @@ import {
   getUserFromCanister,
   getUserNameByPrincipal,
   // useAuth,
-  getFirebase,
+  // getFirebase,
   // useFirebase
   AuthContext,
 } from "../utils";
@@ -19,9 +19,10 @@ import logo from "../assets/images/cancan-logo.png";
 import { LoadingIndicator } from "./LoadingIndicator";
 import { useHistory } from "react-router";
 import "./SignUp.scss";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+// import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { Link } from "react-router-dom";
-
+import { useAuth } from "src/utils/AuthProvider";
+import { auth } from "src/utils/firebase";
 /*
  * This component receives the authentication information and queries to see if
  * the principal returned from Identity Service matches an existing userId. If
@@ -34,11 +35,12 @@ import { Link } from "react-router-dom";
 export function SignUp() {
   const [error, setError] = useState("");
   const [isCheckingICForUser, setIsCheckingICForUser] = useState(false);
-  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
   // const auth = getAuth();
   const history = useHistory();
+  // const {signup} = useAuth();
 
   // Get a user name from the user's principal and then fetch the user object
   // with all the user's data. Show a loading message between these async
@@ -74,7 +76,7 @@ export function SignUp() {
     // Get the username entered from the form.
     const username = usernameInputRef?.current?.value!;
     const password = passwordInputRef?.current?.value!;
-    setIsSigningIn(true);
+    setIsSigningUp(true);
     // Check to make sure this username has not been taken. If this user already
     // has a username, it should have signed them in already.
     // const isAvailable = true;//await checkUsername(username);
@@ -83,24 +85,31 @@ export function SignUp() {
     //   // Create a user on the backend and assign that user to frontend data.
     //   const user = await createUser(username);
     //   auth.setUser(user);
-    //   setIsSigningIn(false);
+    //   setIsSigningUp(false);
     //   history.push("/feed");
     // } else {
     //   setError(`Username '${username}' is not signed up yet. Please sign up here`);
-    //   setIsSigningIn(false);
+    //   setIsSigningUp(false);
     // }
 
     // let firebaseInstance = getFirebase()
     // if (firebaseInstance) {
     //   const auth = getAuth();
-    createUserWithEmailAndPassword(getAuth(), username, password)
+    auth
+      .createUserWithEmailAndPassword(username, password)
       .then((user) => {
-        setIsSigningIn(false);
+        setIsSigningUp(false);
         history.push("/sign-in");
       })
       .catch((error) => {
-        setError(`Username '${username}' is taken`);
-        setIsSigningIn(false);
+        if (error.code.include("auth/weak-password")) {
+          setError("Please enter a stronger password");
+        } else if (error.code.include("auth/email-already-in-use")) {
+          setError(`Email '${username}' is taken`);
+        } else {
+          setError("Unable to register. Please try again later");
+        }
+        setIsSigningUp(false);
       });
     // }
   }
@@ -112,7 +121,7 @@ export function SignUp() {
         loadingMessage="Checking to see if we know you yet..."
       />
       <LoadingIndicator
-        isLoading={isSigningIn}
+        isLoading={isSigningUp}
         loadingMessage="Signing up..."
       />
 

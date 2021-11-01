@@ -207,19 +207,21 @@ function VideoBase(props: VideoProps) {
                 : 0)}
           </span> */}
         </div>
-        <div className="feed-control disabled">
-          <img
-            src={commentIcon}
-            className={
-              // videoInfo.comments?.some((comment) => comment.userId === userId)
-              true ? "active" : ""
-            }
-            alt="icon: comment on current video"
-          />
-          {/* <span>{videoInfo.comments?.length ?? 0}</span> */}
-          <span>2</span>
-        </div>
-        <div className="feed-control disabled">
+        <span onClick={() => console.log("Hello")}>
+          <div className="feed-control">
+            <img
+              src={commentIcon}
+              className={
+                // videoInfo.comments?.some((comment) => comment.userId === userId)
+                true ? "active" : ""
+              }
+              alt="icon: comment on current video"
+            />
+            {/* <span>{videoInfo.comments?.length ?? 0}</span> */}
+            <span>2</span>
+          </div>
+        </span>
+        <div className="feed-control">
           <img
             src={shareIcon}
             // className={videoInfo.shares?.includes(userId) ? "active" : ""}
