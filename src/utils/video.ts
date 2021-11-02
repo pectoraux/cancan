@@ -7,6 +7,7 @@ import {
 } from "./canister";
 import { VideoInfo, VideoInit } from "./canister/typings";
 import { MAX_CHUNK_SIZE, encodeArrayBuffer, hashtagRegExp } from "./index";
+import firebase from "firebase";
 
 // Determines number of chunks and creates the VideoInfo
 export function getVideoInit(
@@ -16,14 +17,14 @@ export function getVideoInit(
 ): VideoInit {
   const chunkCount = Number(Math.ceil(file.size / MAX_CHUNK_SIZE));
   return {
+    userId,
     caption,
     // @ts-ignore
-    chunkCount,
+    // chunkCount,
     // @ts-ignore
     createdAt: Number(Date.now() * 1000), // motoko is using nanoseconds
     name: file.name.replace(/\.mp4/, ""),
     tags: caption.match(hashtagRegExp) || [],
-    userId,
   };
 }
 
@@ -59,22 +60,38 @@ async function uploadVideo(userId: string, file: File, caption: string) {
 
   let chunk = 1;
   const thumb = await generateThumbnail(file);
-  await uploadVideoPic(videoId, thumb);
+  const result = await uploadVideoPic(videoId, thumb);
+  var metadata = {
+    contentType: "mp4",
+  };
+  // Create a root reference
+  var storageRef = firebase.storage().ref();
+  // Create a reference to video
+  // Upload file and metadata to the object video
+  var uploadTask = storageRef
+    .child("videos/" + videoId)
+    .put(videoBuffer, metadata)
+    .then((snapshot) => {
+      console.log("Uploaded an array!");
+      console.log(snapshot);
+    });
+  console.log(uploadTask);
 
-  const putChunkPromises: Promise<[] | [null]>[] = [];
-  for (
-    let byteStart = 0;
-    byteStart < file.size;
-    byteStart += MAX_CHUNK_SIZE, chunk++
-  ) {
-    // putChunkPromises.push(
-    //   processAndUploadChunk(videoBuffer, byteStart, file.size, videoId, chunk)
-    // );
-  }
+  // const putChunkPromises: Promise<[] | [null]>[] = [];
+  // for (
+  //   let byteStart = 0;
+  //   byteStart < file.size;
+  //   byteStart += MAX_CHUNK_SIZE, chunk++
+  // ) {
+  //   // putChunkPromises.push(
+  //   //   processAndUploadChunk(videoBuffer, byteStart, file.size, videoId, chunk)
+  //   // );
+  // }
 
-  await Promise.all(putChunkPromises);
+  // await Promise.all(putChunkPromises);
 
-  return await checkVidFromIC(videoId, userId);
+  // return await checkVidFromIC(videoId, userId);
+  return result;
 }
 
 // This isn't Internet Computer specific, just a helper to generate an image
@@ -122,11 +139,13 @@ export function generateThumbnail(videoFile: File) {
 }
 
 // Stores the videoPic on the canister
-async function uploadVideoPic(videoId: string, file: number[]) {
+async function uploadVideoPic(videoId: string | void, file: number[]) {
   console.log("Storing video thumbnail...");
   try {
-    await putVideoPic(videoId, file);
-    console.log(`Video thumbnail stored for ${videoId}`);
+    if (videoId) {
+      await putVideoPic(videoId, file);
+      console.log(`Video thumbnail stored for ${videoId}`);
+    }
   } catch (error) {
     console.error("Unable to store video thumbnail:", error);
   }
@@ -146,7 +165,7 @@ async function checkVidFromIC(videoId: string, userId: string) {
 // This hook exposes functions to set video data, trigger the upload, and return
 // with "success" to toggle loading states.
 export function useUploadVideo({ userId }: { userId: string }) {
-  const [completedVideo, setCompletedVideo] = useState<VideoInfo>();
+  const [completedVideo, setCompletedVideo] = useState<VideoInfo | void>();
   const [file, setFile] = useState<File>();
   const [caption, setCaption] = useState("");
   const [ready, setReady] = useState(false);

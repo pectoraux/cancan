@@ -17,6 +17,7 @@ import jwtDecode from "jwt-decode";
 import { decode } from "@dfinity/agent/lib/cjs/idl";
 import { auth } from "src/utils";
 import { LoadingIndicator } from "./components/LoadingIndicator";
+import { User } from "firebase/firebase-auth";
 
 function wrapRouteWithFade(Component) {
   return ({ match }) => (

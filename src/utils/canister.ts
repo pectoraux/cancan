@@ -1,5 +1,6 @@
 /// <reference path="../react-app-env.d.ts" />
-
+import { firestore } from "./firebase";
+import firebase from "firebase";
 /*
  * This file wraps all of our canister interaction functions and makes sure they
  * return the expected values by massaging any data necessary.
@@ -38,19 +39,25 @@ export function getUserFromStorage(
   }
 }
 
-export async function createUser(userId: string): Promise<ProfileInfoPlus> {
-  // if (!principal) {
-  //   throw Error("trying to create user without principal");
-  // }
-  // const profile = unwrap<ProfileInfoPlus>(
-  //   await (await CanCan.actor).createProfile(userId, [])
-  // );
-  // if (profile) {
-  //   return profile;
-  // } else {
-  //   throw Error("failed to create profile: " + JSON.stringify(profile));
-  // }
-  return <ProfileInfoPlus>{};
+export async function createProfile(userId: string) {
+  const profile = {
+    userId: userId,
+    uploadedVideos: [],
+    likedVideos: [],
+    followers: [],
+    following: [],
+  };
+  return firestore
+    .collection("profiles")
+    .doc(userId)
+    .set(profile)
+    .then((result) => {
+      return result;
+    })
+    .catch((err) => {
+      console.error("failed to create profile: ", err);
+      return "";
+    });
 }
 
 export async function findOrCreateUser(
@@ -113,17 +120,16 @@ export async function getSearchVideos(
   return Promise.resolve([]);
 }
 
-export async function getFeedVideos(userId: string): Promise<VideoInfo[]> {
-  const videos = [];
+export async function getFeedVideos(
+  userId: string
+): Promise<firebase.storage.Reference[]> {
+  // Create a reference with an initial file path and name
+  var storage = firebase.storage();
+  var videos = await (await storage.ref("videos").listAll()).items;
   // unwrap<VideoResults>(
   //   await (await CanCan.actor).getFeedVideos(userId, [])
   // );
-  if (videos !== null) {
-    const unwrappedVideos = videos.map((v) => v[0]);
-    return unwrappedVideos;
-  } else {
-    return Promise.resolve([]);
-  }
+  return videos;
 }
 
 export async function getVideoInfo(userId: string, videoId: string) {
@@ -143,15 +149,16 @@ export async function getProfilePic(userId: string) {
 }
 
 export async function createVideo(videoInit: VideoInit): Promise<string> {
-  const videoId = "kkl";
-  // unwrap<string>(
-  //   await (await CanCan.actor).createVideo(videoInit)
-  // );
-  if (videoId) {
-    return videoId;
-  } else {
-    throw Error("failed to create video");
-  }
+  return firestore
+    .collection("videos")
+    .add(videoInit)
+    .then((result) => {
+      return result.id;
+    })
+    .catch((err) => {
+      console.error("error adding video: ", err);
+      return "";
+    });
 }
 
 export async function follow(
@@ -196,25 +203,28 @@ export async function getMessages(username: string): Promise<Message[]> {
 }
 
 // Videos are stored as chunked byteArrays, and must be assembled once received
-export async function getVideoChunks(videoInfo: VideoInfo): Promise<string> {
-  const { videoId, chunkCount } = videoInfo;
-  const chunkBuffers: Buffer[] = [];
-  const chunksAsPromises: Array<Promise<Optional<number[]>>> = [];
-  // for (let i = 1; i <= Number(chunkCount.toString()); i++) {
-  //   chunksAsPromises.push((await CanCan.actor).getVideoChunk(videoId, i));
-  // }
-  const nestedBytes: number[][] = (await Promise.all(chunksAsPromises))
-    .map(unwrap)
-    .filter((v): v is number[] => v !== null);
-  nestedBytes.forEach((bytes) => {
-    const bytesAsBuffer = Buffer.from(new Uint8Array(bytes));
-    chunkBuffers.push(bytesAsBuffer);
-  });
-  const videoBlob = new Blob([Buffer.concat(chunkBuffers)], {
-    type: "video/mp4",
-  });
-  const vidURL = URL.createObjectURL(videoBlob);
-  return vidURL;
+export async function getVideoChunks(
+  videoInfo: firebase.storage.Reference
+): Promise<string> {
+  return await videoInfo.getDownloadURL();
+  // const { fullPath } = videoInfo;
+  // const chunkBuffers: Buffer[] = [];
+  // const chunksAsPromises: Array<Promise<Optional<number[]>>> = [];
+  // // for (let i = 1; i <= Number(chunkCount.toString()); i++) {
+  // //   chunksAsPromises.push((await CanCan.actor).getVideoChunk(videoId, i));
+  // // }
+  // const nestedBytes: number[][] = (await Promise.all(chunksAsPromises))
+  //   .map(unwrap)
+  //   .filter((v): v is number[] => v !== null);
+  // nestedBytes.forEach((bytes) => {
+  //   const bytesAsBuffer = Buffer.from(new Uint8Array(bytes));
+  //   chunkBuffers.push(bytesAsBuffer);
+  // });
+  // const videoBlob = new Blob([Buffer.concat(chunkBuffers)], {
+  //   type: "video/mp4",
+  // });
+  // const vidURL = URL.createObjectURL(videoBlob);
+  // return vidURL;
 }
 
 export async function putVideoChunk(
@@ -227,6 +237,20 @@ export async function putVideoChunk(
 
 export async function putVideoPic(videoId: string, file: number[]) {
   // return (await CanCan.actor).putVideoPic(videoId, [file]);
+  var bytes = new Uint8Array(file);
+  // Create the file metadata
+  var metadata = {
+    contentType: "image/jpeg",
+  };
+  // Create a root reference
+  var storageRef = firebase.storage().ref();
+  // Upload file and metadata to the object 'images/mountains.jpg'
+  var uploadTask = storageRef
+    .child("images/" + videoId)
+    .put(bytes, metadata)
+    .then((snapshot) => {
+      console.log("Uploaded an array!");
+    });
 }
 
 // export async function getVideoPic(videoId: string): Promise<number[]> {

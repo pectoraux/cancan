@@ -1,27 +1,10 @@
-import React, {
-  FormEvent,
-  useEffect,
-  useContext,
-  useRef,
-  useState,
-} from "react";
-import {
-  checkUsername,
-  createUser,
-  getUserFromCanister,
-  getUserNameByPrincipal,
-  // useAuth,
-  // getFirebase,
-  // useFirebase
-  AuthContext,
-} from "../utils";
+import React, { FormEvent, useRef, useState } from "react";
+import { createProfile } from "src/utils";
 import logo from "../assets/images/cancan-logo.png";
 import { LoadingIndicator } from "./LoadingIndicator";
 import { useHistory } from "react-router";
 import "./SignUp.scss";
-// import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { Link } from "react-router-dom";
-import { useAuth } from "src/utils/AuthProvider";
 import { auth } from "src/utils/firebase";
 /*
  * This component receives the authentication information and queries to see if
@@ -38,33 +21,7 @@ export function SignUp() {
   const [isSigningUp, setIsSigningUp] = useState(false);
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
-  // const auth = getAuth();
   const history = useHistory();
-  // const {signup} = useAuth();
-
-  // Get a user name from the user's principal and then fetch the user object
-  // with all the user's data. Show a loading message between these async
-  // backend calls happening.
-  // useEffect(() => {
-  //   if (!auth.isAuthReady) return;
-  //   if (auth.isAuthenticated && auth.identity !== undefined) {
-  //     setIsCheckingICForUser(true);
-  //     getUserNameByPrincipal(auth.identity.getPrincipal()).then((username) => {
-  //       if (username) {
-  //         // User exists! Set user and redirect to /feed.
-  //         getUserFromCanister(username).then((user) => {
-  //           setIsCheckingICForUser(false);
-  //           auth.setUser(user!);
-  //           history.replace("/feed");
-  //         });
-  //         setIsCheckingICForUser(false);
-  //       } else {
-  //         // Do nothing. Allow the user to create a userId
-  //         setIsCheckingICForUser(false);
-  //       }
-  //     });
-  //   }
-  // }, [auth.isAuthReady, auth.isAuthenticated, auth.identity]);
 
   // Submit the form to signup with a new username, the backend ensures that
   // the username is available.
@@ -72,34 +29,18 @@ export function SignUp() {
     evt.preventDefault();
     evt.stopPropagation();
     setError("");
-
     // Get the username entered from the form.
     const username = usernameInputRef?.current?.value!;
     const password = passwordInputRef?.current?.value!;
     setIsSigningUp(true);
-    // Check to make sure this username has not been taken. If this user already
-    // has a username, it should have signed them in already.
-    // const isAvailable = true;//await checkUsername(username);
-
-    // if (isAvailable) {
-    //   // Create a user on the backend and assign that user to frontend data.
-    //   const user = await createUser(username);
-    //   auth.setUser(user);
-    //   setIsSigningUp(false);
-    //   history.push("/feed");
-    // } else {
-    //   setError(`Username '${username}' is not signed up yet. Please sign up here`);
-    //   setIsSigningUp(false);
-    // }
-
-    // let firebaseInstance = getFirebase()
-    // if (firebaseInstance) {
-    //   const auth = getAuth();
     auth
       .createUserWithEmailAndPassword(username, password)
       .then((user) => {
+        createProfile(user.user?.uid || "");
+        user.user?.sendEmailVerification().then((result) => {
+          setError("A verification email has been sent to your email address.");
+        });
         setIsSigningUp(false);
-        history.push("/sign-in");
       })
       .catch((error) => {
         if (error.code.include("auth/weak-password")) {
@@ -111,7 +52,6 @@ export function SignUp() {
         }
         setIsSigningUp(false);
       });
-    // }
   }
 
   return (

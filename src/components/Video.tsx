@@ -84,17 +84,17 @@ function VideoBase(props: VideoProps) {
     if (!videoInfo) {
       return;
     }
-    // getVideoChunks(videoInfo).then((blobURL) => {
-    setVideoSourceURL(videoInfo.url);
-    setPlay(true);
-    // });
+    getVideoChunks(videoInfo).then((blobURL) => {
+      setVideoSourceURL(blobURL);
+      setPlay(true);
+    });
     // getProfilePic(videoInfo.userId).then((bytes) => {
-    // if (!bytes) {
-    //   return;
-    // }
-    // const picBlob = new Blob([Buffer.from(new Uint8Array(bytes))], {
-    //   type: "image/jpeg",
-    // });
+    //   if (!bytes) {
+    //     return;
+    //   }
+    //   const picBlob = new Blob([Buffer.from(new Uint8Array(bytes))], {
+    //     type: "image/jpeg",
+    //   });
     // const pic = URL.createObjectURL('');
     const pic = "https://jpeg.org/images/jpeg-home.jpg";
     setUserPic(pic);

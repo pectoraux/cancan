@@ -34,6 +34,8 @@ export function PrivateRoutes({
   setUser,
   logOut,
 }) {
+  console.log("user +=");
+  console.log(user);
   function refreshProfileInfo() {
     // getUserFromCanister(user?.userName!).then((user) => {
     if (user) {

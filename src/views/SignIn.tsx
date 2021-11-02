@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import {
   checkUsername,
-  createUser,
+  // createUser,
   getUserFromCanister,
   getUserNameByPrincipal,
   AuthContext,
@@ -33,16 +33,7 @@ export function SignIn() {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
-  // const auth = getAuth();
   const history = useHistory();
-  // If the auth provider has a user (which could be from local storage) and
-  // the user is properly authenticated with the identity provider service then
-  // send the user to their feed, as they are correctly signed in.
-  // useEffect(() => {
-  //   if (token) {
-  //     history.replace("/feed");
-  //   }
-  // }, [history]);
 
   // Initiates the login flow with the identity provider service, sending the
   // user to a new tab
@@ -55,13 +46,16 @@ export function SignIn() {
     const username = usernameInputRef?.current?.value!;
     const password = passwordInputRef?.current?.value!;
     setIsSigningIn(true);
-    // let firebaseInstance = getFirebase()
-    // if (firebaseInstance) {
-    //   // const auth = getAuth();
     auth
       .signInWithEmailAndPassword(username, password)
       .then((result) => {
-        history.push("/feed");
+        if (!result.user?.emailVerified) {
+          auth.signOut();
+          setError("Please verify your email first");
+          setIsSigningIn(false);
+        } else {
+          history.push("/feed");
+        }
       })
       .catch((error) => {
         setIsSigningIn(false);
