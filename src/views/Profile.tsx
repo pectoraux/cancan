@@ -10,7 +10,7 @@ import {
   fileToImgSrc,
   follow,
   getProfilePic,
-  getUserFromCanister,
+  getUserProfile,
   formatBigNumber,
 } from "../utils";
 import backIcon from "../assets/images/icon-back.png";
@@ -34,7 +34,7 @@ export function Profile({
   currentUser,
   onLogOut,
 }: {
-  currentUser?: ProfileInfoPlus;
+  currentUser;
   onLogOut?: (history: H.History) => any;
 }) {
   const { userId = currentUser?.userName } = useParams<ProfileByIdParams>();
@@ -42,10 +42,8 @@ export function Profile({
   const history = useHistory();
   const { goBack } = useHistory();
 
-  const [userProfile, setUserProfile] = useState<ProfileInfoPlus>();
-  const [profilePic, setProfilePic] = useState(
-    "https://media.istockphoto.com/photos/video-call-with-family-on-christmas-day-during-pandemic-picture-id1279811647?b=1&k=20&m=1279811647&s=170667a&w=0&h=rbQRU_GoWwMsXjwAqfsCmPnjFJ3m_asYZptJc9jBVyU="
-  );
+  const [userProfile, setUserProfile] = useState<any>();
+  const [profilePic, setProfilePic] = useState("");
   const [videoPreview, setVideoPreview] = useState<VideoInfo>();
   const [isLoading, setLoading] = useState(false);
 
@@ -54,7 +52,7 @@ export function Profile({
   const initialIsFollowed = currentUserFollows.indexOf(userId || "") !== -1;
   const [isFollowed, setIsFollowed] = useState(initialIsFollowed);
 
-  const isCurrentUserProfile = !userId || userId === currentUser?.userName;
+  const isCurrentUserProfile = !userId || userId === currentUser?.userId;
 
   function handleShowVideoPreview(clickedVideo: VideoInfo) {
     setVideoPreview(clickedVideo);
@@ -67,7 +65,7 @@ export function Profile({
     }
     try {
       setLoading(true);
-      const profileData = await getUserFromCanister(userId || "");
+      const profileData = await getUserProfile(userId || "");
       setUserProfile(profileData!);
     } catch (error) {
       console.error(`Failed to retrieve profile for user ${userId}`, error);

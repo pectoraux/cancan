@@ -90,8 +90,7 @@ export async function isDropDay(): Promise<boolean> {
 export async function getUserFromCanister(
   userId: string
 ): Promise<ProfileInfoPlus | null> {
-  const icUser = null;
-  // unwrap<ProfileInfoPlus>(
+  const icUser = null; //unwrap<ProfileInfoPlus>(
   //   await (await CanCan.actor).getProfilePlus([userId], userId)
   // );
   if (icUser) {
@@ -99,6 +98,20 @@ export async function getUserFromCanister(
   } else {
     return null;
   }
+}
+
+export async function getUserProfile(userId: string) {
+  return firestore
+    .collection("profiles")
+    .doc(userId)
+    .get()
+    .then((doc) => {
+      return doc.data();
+    })
+    .catch((err) => {
+      console.error("error getting profile: ", err);
+      return null;
+    });
 }
 
 export async function getSearchVideos(
@@ -236,7 +249,6 @@ export async function putVideoChunk(
 }
 
 export async function putVideoPic(videoId: string, file: number[]) {
-  // return (await CanCan.actor).putVideoPic(videoId, [file]);
   var bytes = new Uint8Array(file);
   // Create the file metadata
   var metadata = {
@@ -250,6 +262,24 @@ export async function putVideoPic(videoId: string, file: number[]) {
     .put(bytes, metadata)
     .then((snapshot) => {
       console.log("Uploaded an array!");
+    });
+}
+
+export async function putProfilePic(userId: string, file: File) {
+  // var bytes = new Uint8Array(file);
+  // Create the file metadata
+  var metadata = {
+    contentType: "image/jpeg",
+  };
+  // Create a root reference
+  var storageRef = firebase.storage().ref();
+  // Upload file and metadata to the object 'images/mountains.jpg'
+  return storageRef
+    .child("profilePics/" + userId)
+    .put(file, metadata)
+    .then((snapshot) => {
+      console.log("Uploaded an array!");
+      return snapshot.ref.getDownloadURL();
     });
 }
 

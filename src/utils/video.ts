@@ -4,6 +4,7 @@ import {
   getVideoInfo,
   putVideoChunk,
   putVideoPic,
+  putProfilePic,
 } from "./canister";
 import { VideoInfo, VideoInit } from "./canister/typings";
 import { MAX_CHUNK_SIZE, encodeArrayBuffer, hashtagRegExp } from "./index";
@@ -62,7 +63,7 @@ async function uploadVideo(userId: string, file: File, caption: string) {
   const thumb = await generateThumbnail(file);
   const result = await uploadVideoPic(videoId, thumb);
   var metadata = {
-    contentType: "mp4",
+    contentType: "video/mp4",
   };
   // Create a root reference
   var storageRef = firebase.storage().ref();
@@ -148,6 +149,21 @@ async function uploadVideoPic(videoId: string | void, file: number[]) {
     }
   } catch (error) {
     console.error("Unable to store video thumbnail:", error);
+  }
+}
+
+// Stores the videoPic on the canister
+export async function uploadProfilePic(userId: string | void, file: File) {
+  console.log(`Storing profile pic... ${userId}`);
+  try {
+    if (userId) {
+      const res = await putProfilePic(userId, file);
+      console.log(`Profile pic stored for ${res}`);
+      return res;
+    }
+  } catch (error) {
+    console.error("Unable to store profile pic:", error);
+    return "";
   }
 }
 

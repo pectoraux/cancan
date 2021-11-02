@@ -4,6 +4,7 @@ import { getUserFromCanister } from "../utils";
 import { Feed } from "../views/Feed";
 import { Discover } from "../views/Discover";
 import { Upload } from "./Upload";
+import { UploadProfile } from "./UploadProfile";
 import { Rewards } from "../views/Rewards";
 import { Profile } from "../views/Profile";
 import { DropDayNotification } from "./DropDayNotification";
@@ -55,6 +56,10 @@ export function PrivateRoutes({
     {
       path: "/upload",
       render: () => <Upload onUpload={refreshProfileInfo} user={user} />,
+    },
+    {
+      path: "/upload_profile",
+      render: () => <UploadProfile onUpload={refreshProfileInfo} user={user} />,
     },
     { path: "/rewards", render: () => <Rewards /> },
     {
