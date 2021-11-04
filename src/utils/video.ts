@@ -21,6 +21,7 @@ export function getVideoInit(
     userId,
     caption,
     // @ts-ignore
+    collectionId,
     // chunkCount,
     // @ts-ignore
     createdAt: Number(Date.now() * 1000), // motoko is using nanoseconds

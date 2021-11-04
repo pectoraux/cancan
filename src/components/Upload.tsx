@@ -4,6 +4,7 @@ import { ProfileInfoPlus } from "../utils/canister/typings";
 import { useUploadVideo } from "../utils";
 import { LoadingIndicator } from "./LoadingIndicator";
 import "./Upload.scss";
+import backIcon from "../assets/images/icon-back.png";
 
 /*
  * Allows selection of a file followed by the option to add a caption before
@@ -90,6 +91,11 @@ export function Upload({
         width: "100%",
       }}
     >
+      <header style={{ position: "relative", top: "30px" }} id="alt-header">
+        <button id="back" onClick={() => history.push("/profile")}>
+          <img src={backIcon} alt="Go Back" />
+        </button>
+      </header>
       <LoadingIndicator
         loadingMessage="Uploading..."
         completedMessage="Uploaded!"

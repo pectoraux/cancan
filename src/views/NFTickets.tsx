@@ -32,7 +32,7 @@ type ProfileByIdParams = {
  * There are 4 secondary views: a list of uploaded videos, list of followers,
  * list of users the user follows, and a video preview of any uploaded videos.
  */
-export function Profile({ currentUser }) {
+export function NFTickets({ currentUser }) {
   const { userId = currentUser?.uid } = useParams<ProfileByIdParams>();
   const [activeSubView, setActiveSubView] = useState(0);
   const history = useHistory();
@@ -151,34 +151,11 @@ export function Profile({ currentUser }) {
           <ProfilePic name={userId} profilePic={profilePic} />
           <h2>
             <span>{auth.currentUser?.email}</span>
-            <br />
-            {isCurrentUserProfile ? (
-              <>
-                <button
-                  className="btn-link"
-                  style={{ fontSize: "1.4rem" }}
-                  onClick={() => {
-                    auth.signOut();
-                    history.push("/sign-in");
-                  }}
-                >
-                  Log out
-                </button>
-              </>
-            ) : (
-              <FollowButton
-                isFollowing={isFollowed}
-                handleFollow={handleFollowCurrent}
-              />
-            )}
           </h2>
           <section className="profile-nav">
             {[
-              ["Channels", userChannel?.length || 1],
-              ["Partners", followers.length],
-              ["Videos", [].length],
-              ["Followers", followers.length],
-              ["Following", following.length],
+              ["Active", [].length],
+              ["Finished", following.length],
             ].map(([label, count], index) => (
               <ProfileNavLink
                 key={label}
@@ -191,124 +168,38 @@ export function Profile({ currentUser }) {
           </section>
         </div>
         {activeSubView === 0 && (
-          <>
-            <div className="create">
-              {isCurrentUserProfile && (
-                <Link to="/create_channel">
-                  <button
-                    className="primary"
-                    style={{ height: "40px", marginBottom: "10px" }}
-                  >
-                    Create new channel!
-                  </button>
-                </Link>
-              )}
-            </div>
-            <section className="channels">
-              {["channel 1"].map((channel) => (
-                <ChannelRow
-                  key={channel}
-                  userName={channel}
-                  handleFollow={handleFollow}
-                  following={false}
-                  // following={currentUserFollows.includes(follower.userName)}
-                  // disableFollow={follower.userName === currentUser?.userName}
-                />
-              ))}
-            </section>
-          </>
+          <section className="profile-videos">
+            {[].length > 0 ? (
+              <></>
+            ) : (
+              // [].map((uploadedVideo) => (
+              //   // <img
+              //   //   key={uploadedVideo.videoId}
+              //   //   src={fileToImgSrc(uploadedVideo.pic)}
+              //   //   alt={`${uploadedVideo.name} - ${uploadedVideo.caption}`}
+              //   //   role="button"
+              //   //   onClick={() => handleShowVideoPreview(uploadedVideo)}
+              //   // />
+              // ))
+              <div className="no-results">No active NFTickets yet</div>
+            )}
+          </section>
         )}
         {activeSubView === 1 && (
-          <section className="partners">
+          <section className="profile-videos">
             {[].length > 0 ? (
-              followers.map((follower) => (
-                <FollowUserRow
-                  key={follower.userName}
-                  userName={follower.userName}
-                  handleFollow={handleFollow}
-                  following={false}
-                  // following={currentUserFollows.includes(follower.userName)}
-                  disableFollow={follower.userName === currentUser?.userName}
-                />
-              ))
+              <></>
             ) : (
-              <div className="no-results">No partners yet!</div>
-            )}
-          </section>
-        )}
-        {activeSubView === 2 && (
-          <>
-            <div className="create">
-              {isCurrentUserProfile && (
-                <Link to="/create_collection">
-                  <button
-                    className="primary"
-                    style={{ height: "40px", marginBottom: "10px" }}
-                  >
-                    Create new collection!
-                  </button>
-                </Link>
-              )}
-            </div>
-            <h2 style={{ textAlign: "center" }}>Collection Name</h2>
-            <section className="profile-videos">
-              {[].length > 0 ? (
-                <></>
-              ) : (
-                // [].map((uploadedVideo) => (
-                //   // <img
-                //   //   key={uploadedVideo.videoId}
-                //   //   src={fileToImgSrc(uploadedVideo.pic)}
-                //   //   alt={`${uploadedVideo.name} - ${uploadedVideo.caption}`}
-                //   //   role="button"
-                //   //   onClick={() => handleShowVideoPreview(uploadedVideo)}
-                //   // />
-                // ))
-                <div className="no-results">
-                  No videos yet
-                  {isCurrentUserProfile && (
-                    <Link to="/upload">
-                      <button className="primary">Upload one now!</button>
-                    </Link>
-                  )}
-                </div>
-              )}
-            </section>
-          </>
-        )}
-        {activeSubView === 3 && (
-          <section className="followers">
-            {followers.length > 0 ? (
-              followers.map((follower) => (
-                <FollowUserRow
-                  key={follower.userName}
-                  userName={follower.userName}
-                  handleFollow={handleFollow}
-                  following={false}
-                  // following={currentUserFollows.includes(follower.userName)}
-                  disableFollow={follower.userName === currentUser?.userName}
-                />
-              ))
-            ) : (
-              <div className="no-results">No followers yet!</div>
-            )}
-          </section>
-        )}
-        {activeSubView === 4 && (
-          <section className="following">
-            {following.length > 0 ? (
-              following.map((following) => (
-                <FollowUserRow
-                  key={following.userName}
-                  userName={following.userName}
-                  handleFollow={handleFollow}
-                  following={false}
-                  // following={currentUserFollows.includes(following.userName)}
-                  disableFollow={following.userName === currentUser?.userName}
-                />
-              ))
-            ) : (
-              <div className="no-results">Not following anyone yet!</div>
+              // [].map((uploadedVideo) => (
+              //   // <img
+              //   //   key={uploadedVideo.videoId}
+              //   //   src={fileToImgSrc(uploadedVideo.pic)}
+              //   //   alt={`${uploadedVideo.name} - ${uploadedVideo.caption}`}
+              //   //   role="button"
+              //   //   onClick={() => handleShowVideoPreview(uploadedVideo)}
+              //   // />
+              // ))
+              <div className="no-results">No finished NFTickets yet</div>
             )}
           </section>
         )}

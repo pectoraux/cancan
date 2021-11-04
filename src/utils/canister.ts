@@ -40,12 +40,18 @@ export function getUserFromStorage(
 }
 
 export async function createProfile(userId: string) {
+  const channelName = "default";
   const profile = {
-    userId: userId,
-    uploadedVideos: [],
-    likedVideos: [],
-    followers: [],
-    following: [],
+    channels: [
+      {
+        name: channelName,
+        collections: {},
+        likedVideos: [],
+        followers: [],
+        following: [],
+        partners: [],
+      },
+    ],
   };
   return firestore
     .collection("profiles")
@@ -56,6 +62,59 @@ export async function createProfile(userId: string) {
     })
     .catch((err) => {
       console.error("failed to create profile: ", err);
+      return "";
+    });
+}
+
+export async function createCollection(userId: string, name: string) {
+  const collection = {
+    userId: userId,
+    collectionName: name,
+    uploadedVideos: [],
+  };
+  return firestore
+    .collection("collections")
+    .add(collection)
+    .then((result) => {
+      return result;
+    })
+    .catch((err) => {
+      console.error("failed to create collection: ", err);
+      return "";
+    });
+}
+
+export async function addChannel(userId: string, channelName: string) {
+  const channel = {
+    name: channelName,
+    collections: {},
+    likedVideos: [],
+    followers: [],
+    following: [],
+  };
+  return firestore
+    .collection("profiles")
+    .doc(userId)
+    .update({ channels: firebase.firestore.FieldValue.arrayUnion(channel) });
+}
+
+export async function createChannel(userId: string, name: string) {
+  const channel = {
+    userId: userId,
+    channelName: name,
+    collections: [],
+    likedVideos: [],
+    followers: [],
+    following: [],
+  };
+  return firestore
+    .collection("channels")
+    .add(channel)
+    .then((result) => {
+      return result.id;
+    })
+    .catch((err) => {
+      console.error("failed to create channel: ", err);
       return "";
     });
 }
@@ -110,6 +169,20 @@ export async function getUserProfile(userId: string) {
     })
     .catch((err) => {
       console.error("error getting profile: ", err);
+      return null;
+    });
+}
+
+export async function getUserChannels(userId: string) {
+  return firestore
+    .collection("channels")
+    .where("userId", "==", userId)
+    .get()
+    .then((snap) => {
+      return snap.docs.values();
+    })
+    .catch((err) => {
+      console.error("error getting channels: ", err);
       return null;
     });
 }

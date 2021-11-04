@@ -12,7 +12,7 @@ import { SignUp } from "./components/SignUp";
 import { PrivateRoutes } from "./components/PrivateRoutes";
 import { Feed } from "./views/Feed";
 // import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { AuthContext } from "src/utils";
+import { AuthContext, getUserProfile } from "src/utils";
 import jwtDecode from "jwt-decode";
 import { decode } from "@dfinity/agent/lib/cjs/idl";
 import { auth } from "src/utils";
@@ -135,10 +135,7 @@ export function AppRouter() {
                 </Route>
                 <PrivateRoutes
                   location={location}
-                  user={user}
                   isAuthenticated={isAuthenticated}
-                  setUser={() => {}}
-                  logOut={() => {}}
                 />
               </TransitionGroup>
             )}

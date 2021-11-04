@@ -32,7 +32,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 1.6rem 0;
+  margin: 2.7rem 0;
 
   img,
   .placeholder-profile-pic {
@@ -110,6 +110,18 @@
   }
 }
 
+.create {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #d9d9da;
+  color: #333;
+  font-size: 1.8rem;
+  > * {
+    margin-top: 2rem;
+  }
+}
+
 .no-results {
   display: flex;
   flex-direction: column;
@@ -119,13 +131,17 @@
   background-color: #d9d9da;
   color: #333;
   font-size: 1.8rem;
-
+  position: relative;
+  top: -80px;
+  margin-bottom: 10rem;
   > * {
     margin-top: 2rem;
   }
 }
 
 .followers,
+.channels,
+.partners,
 .following {
   display: flex;
   flex-direction: column;

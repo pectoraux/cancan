@@ -11,6 +11,8 @@ import likeIcon from "../assets/images/icon-like.png";
 import commentIcon from "../assets/images/icon-comment.png";
 import shareIcon from "../assets/images/icon-share.png";
 import "./Video.scss";
+import downIcon from "../assets/images/icon-down.png";
+import upIcon from "../assets/images/icon-up.png";
 
 // The amount of flags a video needs before we blur it out on frontend
 const VIDEO_BLUR_MIN = 1;
@@ -70,6 +72,7 @@ function VideoBase(props: VideoProps) {
   const [userPic, setUserPic] = useState<string>();
   const [userLikes, setUserLikes] = useState(true); //useState(videoInfo.likes.includes(userId));
   const [isSuperLiked, setIsSuperLiked] = useState(false);
+  const [toggleCaption, setToggleCaption] = useState(false);
 
   const videoIsFlagged = false; //videoInfo.abuseFlagCount >= VIDEO_BLUR_MIN;
 
@@ -145,28 +148,40 @@ function VideoBase(props: VideoProps) {
         style={videoBlurStyle}
       />
       <div className="user-details">
-        <ProfilePic name={"videoInfo.userId"} profilePic={userPic} />
-        <div style={{ position: "relative" }}>
+        <div style={{ position: "relative", top: "-5px", fontSize: "1.8rem" }}>
+          <ProfilePic name={"videoInfo.userId"} profilePic={userPic} />
+          <img
+            style={{ position: "relative", bottom: "40px", marginLeft: "5px" }}
+            src={toggleCaption ? upIcon : downIcon}
+            alt="Go Back"
+            onClick={() => setToggleCaption(!toggleCaption)}
+          />
+          <Link
+            to={isCurrentUser ? `/profile` : `/profiles/${"videoInfo.userId"}`}
+          >
+            @{"videoInfo.userId"}
+          </Link>
+        </div>
+        <div style={{ position: "relative", top: "-250px" }}>
           <div className="uploader-info">
-            <span className="userId">
-              <Link
-                to={
-                  isCurrentUser ? `/profile` : `/profiles/${"videoInfo.userId"}`
-                }
-              >
-                @{"videoInfo.userId"}
-              </Link>
-            </span>
-            <p className="caption">{"videoInfo.caption"}</p>
+            <div
+              className="caption"
+              style={{
+                display: "block",
+                wordWrap: "break-word",
+                overflowY: "auto",
+                maxHeight: "200px",
+              }}
+            >
+              {toggleCaption &&
+                "videoInfo.caption videoInfo.captionvideoInfo .captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.caption"}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Side controls for user interaction with the video. */}
-      <div
-        className="feed-controls"
-        style={{ position: "absolute", top: "1px" }}
-      >
+      <div className="feed-controls">
         <div className="feed-control" id="superlikeButton">
           <SuperLikeButton
             disabled={false} //videoInfo.userId === userId}
@@ -174,7 +189,7 @@ function VideoBase(props: VideoProps) {
             isSuperLiked={isSuperLiked}
           />
           <span>
-            {/*currentUser?.remainingSuperlikes ||*/ 0}/
+            {/* currentUser?.remainingSuperlikes ||*/ 0}/
             {/*currentUser?.totalSuperlikes ||*/ 10}
           </span>
         </div>

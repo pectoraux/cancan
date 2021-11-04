@@ -69,11 +69,11 @@ export function MainNav({ paths }) {
         </Link>
       </div>
       <div className="nav-item">
-        <NavLink {...setDestination("/rewards")}>
+        <NavLink {...setDestination("/nftickets")}>
           <img
-            aria-label="Rewards"
+            aria-label="NFTickets"
             src={rewardsIcon}
-            alt="Rewards"
+            alt="NFTickets"
             role="button"
             width={20}
           />

@@ -94,7 +94,7 @@ export function Feed({
             key={v.name}
             videoInfo={v}
             userId={auth.currentUser?.uid || ""}
-            userRewardPoints={Number(profileInfo?.rewards.toString()) || 0}
+            userRewardPoints={0}
             onRefreshUser={onRefreshUser}
           />
         ))}

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { CSSTransition } from "react-transition-group";
 import { getUserFromCanister } from "../utils";
 import { Feed } from "../views/Feed";
@@ -14,6 +14,10 @@ import { Redirect, Route, Switch } from "react-router-dom";
 import { AuthContext } from "src/utils";
 // import { getAuth } from "@firebase/auth";
 import { auth } from "src/utils/firebase";
+import { CreateChannel } from "./CreateChannel";
+import { CreateCollection } from "./CreateCollection";
+import { getUserProfile } from "src/utils/canister";
+import { NFTickets } from "src/views/NFTickets";
 
 function wrapPrivateRouteWithSlide(render) {
   return ({ match }) => (
@@ -28,48 +32,53 @@ function wrapPrivateRouteWithSlide(render) {
   );
 }
 
-export function PrivateRoutes({
-  location,
-  user,
-  isAuthenticated,
-  setUser,
-  logOut,
-}) {
-  console.log("user +=");
-  console.log(user);
+export function PrivateRoutes({ location, isAuthenticated }) {
+  const [userProfile, setUserProfile] = useState<any>({});
+
   function refreshProfileInfo() {
-    // getUserFromCanister(user?.userName!).then((user) => {
-    if (user) {
-      setUser(user);
-    }
-    // });
+    getUserProfile(auth.currentUser?.uid!).then((res) => {
+      setUserProfile(res);
+    });
   }
 
   const privateRoutes = [
     {
       path: "/feed",
       render: () => (
-        <Feed profileInfo={user} onRefreshUser={refreshProfileInfo} />
+        <Feed profileInfo={userProfile} onRefreshUser={refreshProfileInfo} />
       ),
     },
-    { path: "/discover", render: () => <Discover profileInfo={user} /> },
+    { path: "/discover", render: () => <Discover profileInfo={userProfile} /> },
     {
       path: "/upload",
-      render: () => <Upload onUpload={refreshProfileInfo} user={user} />,
+      render: () => <Upload onUpload={refreshProfileInfo} user={userProfile} />,
+    },
+    {
+      path: "/create_channel",
+      render: () => <CreateChannel user={userProfile} />,
     },
     {
       path: "/upload_profile",
-      render: () => <UploadProfile onUpload={refreshProfileInfo} user={user} />,
+      render: () => (
+        <UploadProfile onUpload={refreshProfileInfo} user={userProfile} />
+      ),
     },
-    { path: "/rewards", render: () => <Rewards /> },
+    {
+      path: "/create_collection",
+      render: () => <CreateCollection user={userProfile} />,
+    },
+    {
+      path: "/nftickets",
+      render: () => <NFTickets currentUser={userProfile} />,
+    },
     {
       path: "/profile",
-      render: () => <Profile currentUser={user} onLogOut={auth.signOut} />,
+      render: () => <Profile currentUser={userProfile} />,
     },
     {
       path: "/profiles/:userId",
       render: ({ match }) => (
-        <Profile key={match?.params.userId} currentUser={user} />
+        <Profile key={match?.params.userId} currentUser={userProfile} />
       ),
     },
   ];

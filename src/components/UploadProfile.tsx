@@ -4,6 +4,7 @@ import { LoadingIndicator } from "./LoadingIndicator";
 import "./Upload.scss";
 import { uploadProfilePic } from "../utils/video";
 import { auth } from "src/utils/firebase";
+import backIcon from "../assets/images/icon-back.png";
 /*
  * Allows selection of a file followed by the option to add a caption before
  * uploading to the canister. Utility functions assist in the data translation.
@@ -44,6 +45,11 @@ export function UploadProfile({ user, onUpload }) {
         width: "100%",
       }}
     >
+      <header style={{ position: "relative", top: "30px" }} id="alt-header">
+        <button id="back" onClick={() => history.push("/profile")}>
+          <img src={backIcon} alt="Go Back" />
+        </button>
+      </header>
       <LoadingIndicator
         loadingMessage="Uploading..."
         completedMessage="Uploaded!"
