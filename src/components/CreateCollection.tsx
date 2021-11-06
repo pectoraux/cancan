@@ -4,7 +4,7 @@ import { LoadingIndicator } from "./LoadingIndicator";
 import "./Upload.scss";
 import { uploadProfilePic } from "../utils/video";
 import { auth } from "src/utils/firebase";
-import { createChannel, addChannel } from "src/utils";
+import { createCollection } from "src/utils";
 import backIcon from "../assets/images/icon-back.png";
 /*
  * Allows selection of a file followed by the option to add a caption before
@@ -26,7 +26,7 @@ export function CreateCollection({ user }) {
     const collectionName = collectionNameRef?.current?.value!;
     if (collectionName.trim()) {
       setCreating(true);
-      addChannel(auth.currentUser?.uid || "", collectionName).then(() => {
+      createCollection(auth.currentUser?.uid!, collectionName).then(() => {
         setCreating(false);
         setTimeout(() => {
           history.push("/profile");

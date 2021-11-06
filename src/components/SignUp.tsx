@@ -36,16 +36,17 @@ export function SignUp() {
     auth
       .createUserWithEmailAndPassword(username, password)
       .then((user) => {
-        createProfile(user.user?.uid || "");
+        createProfile(user.user?.uid || "", username);
         user.user?.sendEmailVerification().then((result) => {
           setError("A verification email has been sent to your email address.");
         });
         setIsSigningUp(false);
       })
       .catch((error) => {
-        if (error.code.include("auth/weak-password")) {
+        console.log(error);
+        if (error.code === "auth/weak-password") {
           setError("Please enter a stronger password");
-        } else if (error.code.include("auth/email-already-in-use")) {
+        } else if (error.code === "auth/email-already-in-use") {
           setError(`Email '${username}' is taken`);
         } else {
           setError("Unable to register. Please try again later");

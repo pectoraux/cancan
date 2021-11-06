@@ -26,11 +26,13 @@ export function CreateChannel({ user }) {
     const channelName = channelNameRef?.current?.value!;
     if (channelName.trim()) {
       setCreating(true);
-      addChannel(auth.currentUser?.uid || "", channelName).then(() => {
-        setCreating(false);
-        setTimeout(() => {
-          history.push("/profile");
-        }, 2000);
+      createChannel(auth.currentUser?.uid!, channelName).then((channelId) => {
+        addChannel(auth.currentUser?.uid!, channelId, channelName).then(() => {
+          setCreating(false);
+          setTimeout(() => {
+            history.push("/profile");
+          }, 2000);
+        });
       });
     } else {
       setError("Name not valid");

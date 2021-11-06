@@ -3,12 +3,15 @@ import { textToColor } from "../utils";
 import { Link } from "react-router-dom";
 import { auth } from "src/utils/firebase";
 
-export function ProfilePic({ name, profilePic }) {
+export function ProfilePic({ name, profilePic, clickable = true }) {
   // const profileColor = textToColor(name);
 
   return (
     <div className="profile-pic">
-      <Link to="/upload_profile">
+      <Link
+        to="/upload_profile"
+        onClick={(event) => !clickable && event.preventDefault()}
+      >
         {auth.currentUser?.photoURL ? (
           <img alt={name} src={`${auth.currentUser?.photoURL}`} />
         ) : (

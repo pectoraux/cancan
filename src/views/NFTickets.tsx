@@ -19,7 +19,6 @@ import "./Profile.scss";
 import { ProfileInfoPlus, VideoInfo } from "../utils/canister/typings";
 // import { getAuth } from "@firebase/auth";
 import { auth } from "src/utils/firebase";
-import { getUserChannels } from "src/utils/canister";
 
 type ProfileByIdParams = {
   userId: string;

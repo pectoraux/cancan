@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { CSSTransition } from "react-transition-group";
 import { getUserFromCanister } from "../utils";
 import { Feed } from "../views/Feed";

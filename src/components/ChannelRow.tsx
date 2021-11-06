@@ -10,13 +10,15 @@ import "./FollowUserRow.scss";
  * with a button to follow/unfollow that user.
  */
 export function ChannelRow({
-  userName,
+  channelId,
+  channelName,
   handleFollow = () => {},
   following = false,
-  disableFollow = false,
+  disableFollow = true,
 }: {
-  userName: string;
-  handleFollow?: (userName: string, willFollow: boolean) => void;
+  channelId: string;
+  channelName: string;
+  handleFollow?: (channelId: string, willFollow: boolean) => void;
   following?: boolean;
   disableFollow?: boolean;
 }) {
@@ -27,22 +29,22 @@ export function ChannelRow({
   function handleFollowClick(event) {
     event.preventDefault();
     setIsFollowing((state) => !state);
-    handleFollow(userName, !isFollowing);
+    handleFollow(channelId, !isFollowing);
   }
 
   return (
-    <Link to={disableFollow ? "/profile" : `/profiles/${userName}`}>
+    <Link to={disableFollow ? "/profile" : `/profiles/${channelId}`}>
       <div className="follow-row">
-        <ProfilePic profilePic="" name={userName} />
-        <span className="username">{userName}</span>
-        {disableFollow ? (
+        <ProfilePic profilePic="" name={channelId} clickable={false} />
+        <span className="username">{channelName}</span>
+        {/* {disableFollow ? (
           <div />
         ) : (
           <FollowButton
             isFollowing={isFollowing}
             handleFollow={handleFollowClick}
           />
-        )}
+        )} */}
       </div>
     </Link>
   );

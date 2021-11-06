@@ -1,10 +1,10 @@
 .video-container {
-  position: relative;
+  position: absolute;
   height: 100%;
   scroll-snap-align: start;
 
   video {
-    height: var(--app-height);
+    height: 80%;
     width: var(--app-width);
     object-fit: cover;
   }
@@ -15,14 +15,6 @@
   width: 100%;
   height: 10rem;
   bottom: 25rem;
-  background-image: linear-gradient(
-    180deg,
-    #0000,
-    #0001 4%,
-    #0004 12%,
-    #000a 50%,
-    #000c 100%
-  );
 
   .userId {
     font-size: 1.8rem;
@@ -31,6 +23,14 @@
   .caption {
     font-size: 1.4rem;
     line-height: 1.9rem;
+    background-image: linear-gradient(
+      180deg,
+      #0000,
+      #0001 4%,
+      #0004 12%,
+      #000a 50%,
+      #000c 100%
+    );
   }
 
   .profile-pic {

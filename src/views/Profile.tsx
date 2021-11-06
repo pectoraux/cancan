@@ -12,6 +12,7 @@ import {
   follow,
   getProfilePic,
   getUserProfile,
+  getUserChannel,
   formatBigNumber,
 } from "../utils";
 import backIcon from "../assets/images/icon-back.png";
@@ -19,7 +20,7 @@ import "./Profile.scss";
 import { ProfileInfoPlus, VideoInfo } from "../utils/canister/typings";
 // import { getAuth } from "@firebase/auth";
 import { auth } from "src/utils/firebase";
-import { getUserChannels } from "src/utils/canister";
+import Select from "react-select";
 
 type ProfileByIdParams = {
   userId: string;
@@ -40,6 +41,8 @@ export function Profile({ currentUser }) {
 
   const [userProfile, setUserProfile] = useState<any>();
   const [userChannel, setUserChannel] = useState<any>();
+  const [userChannelNames, setUserChannelNames] = useState<any>();
+  const [userChannelIds, setUserChannelIds] = useState<any>();
   const [profilePic, setProfilePic] = useState("");
   const [videoPreview, setVideoPreview] = useState<VideoInfo>();
   const [isLoading, setLoading] = useState(false);
@@ -50,22 +53,26 @@ export function Profile({ currentUser }) {
   // currentUserFollows.indexOf(userId || "") !== -1;
   const [isFollowed, setIsFollowed] = useState(initialIsFollowed);
 
-  const isCurrentUserProfile = !userId || userId === currentUser?.userId;
+  const [selectedOption, setSelectedOption] = useState<string>("Collections");
+
+  const isCurrentUserProfile = !userId || userId === auth.currentUser?.uid;
 
   function handleShowVideoPreview(clickedVideo: VideoInfo) {
     setVideoPreview(clickedVideo);
   }
 
   async function fetchUserProfile() {
+    const currentUserId = userId ? userId : auth.currentUser?.uid;
     try {
       setLoading(true);
-      getUserProfile(auth.currentUser?.uid!).then((res) => {
-        // setUserProfile([res]);
-        // setUserChannel(res?.channels[0]);
-        setUserChannel(res?.channels);
+      await getUserProfile(currentUserId).then((res) => {
+        setUserProfile(res);
       });
     } catch (error) {
-      console.error(`Failed to retrieve profile for user ${userId}`, error);
+      console.error(
+        `Failed to retrieve profile for user ${currentUserId}`,
+        error
+      );
     } finally {
       setLoading(false);
     }
@@ -95,32 +102,44 @@ export function Profile({ currentUser }) {
 
   function handleFollowCurrent() {
     setIsFollowed((state) => !state);
-    handleFollow(userName, !isFollowed);
+    // handleFollow(userName, !isFollowed);
   }
 
+  const actions = [
+    { label: "Collections", value: 0 },
+    { label: "Add", value: 1 },
+    { label: "Edit", value: 2 },
+    { label: "Delete", value: 3 },
+  ];
+
+  const customStyles = {
+    option: (provided, state) => ({
+      ...provided,
+      borderBottom: "1px dotted pink",
+      color: state.isSelected ? "red" : "blue",
+      padding: 2,
+    }),
+    control: () => ({
+      // none of react-select's styles are passed to <Control />
+      width: 400,
+    }),
+    singleValue: (provided, state) => {
+      const opacity = state.isDisabled ? 0.5 : 1;
+      const transition = "opacity 300ms";
+
+      return { ...provided, opacity, transition };
+    },
+  };
+
   // @ts-ignore
-  var {
+  const {
     userName = "",
-    name,
     partners = [],
-    collections = {},
+    collectionNames = [],
+    uploadedVideos = [],
     followers = [],
     following = [],
-    likedVideos = [],
-  } = userChannel ?? {};
-  console.log("UserProfile333");
-  console.log(userChannel);
-  //   const channel = userProfile[0].channels[0];
-  //   var {
-  //     userName = "",
-  //     uploadedVideos = [],
-  //     channels = [],
-  //     partners = [],
-  //     followers = [],
-  //     following = [],
-  //   } = channel ?? {}
-  // }
-  // const channels = userProfile? userProfile[0]?.channels : [];
+  } = userProfile ?? {};
   return (
     <>
       {!isCurrentUserProfile && (
@@ -150,7 +169,7 @@ export function Profile({ currentUser }) {
         <div className="profile-header">
           <ProfilePic name={userId} profilePic={profilePic} />
           <h2>
-            <span>{auth.currentUser?.email}</span>
+            <span>{userProfile?.email}</span>
             <br />
             {isCurrentUserProfile ? (
               <>
@@ -174,11 +193,10 @@ export function Profile({ currentUser }) {
           </h2>
           <section className="profile-nav">
             {[
-              ["Channels", userChannel?.length || 1],
-              ["Partners", followers.length],
-              ["Videos", [].length],
-              ["Followers", followers.length],
-              ["Following", following.length],
+              ["Partners", partners?.length || 0],
+              ["Videos", uploadedVideos?.length || 0],
+              ["Followers", followers?.length || 0],
+              ["Following", following?.length || 0],
             ].map(([label, count], index) => (
               <ProfileNavLink
                 key={label}
@@ -191,37 +209,9 @@ export function Profile({ currentUser }) {
           </section>
         </div>
         {activeSubView === 0 && (
-          <>
-            <div className="create">
-              {isCurrentUserProfile && (
-                <Link to="/create_channel">
-                  <button
-                    className="primary"
-                    style={{ height: "40px", marginBottom: "10px" }}
-                  >
-                    Create new channel!
-                  </button>
-                </Link>
-              )}
-            </div>
-            <section className="channels">
-              {["channel 1"].map((channel) => (
-                <ChannelRow
-                  key={channel}
-                  userName={channel}
-                  handleFollow={handleFollow}
-                  following={false}
-                  // following={currentUserFollows.includes(follower.userName)}
-                  // disableFollow={follower.userName === currentUser?.userName}
-                />
-              ))}
-            </section>
-          </>
-        )}
-        {activeSubView === 1 && (
           <section className="partners">
-            {[].length > 0 ? (
-              followers.map((follower) => (
+            {partners.length > 0 ? (
+              partners.map((follower) => (
                 <FollowUserRow
                   key={follower.userName}
                   userName={follower.userName}
@@ -236,47 +226,87 @@ export function Profile({ currentUser }) {
             )}
           </section>
         )}
-        {activeSubView === 2 && (
+
+        {activeSubView === 1 && (
           <>
-            <div className="create">
-              {isCurrentUserProfile && (
-                <Link to="/create_collection">
-                  <button
-                    className="primary"
-                    style={{ height: "40px", marginBottom: "10px" }}
-                  >
-                    Create new collection!
-                  </button>
-                </Link>
-              )}
-            </div>
-            <h2 style={{ textAlign: "center" }}>Collection Name</h2>
-            <section className="profile-videos">
-              {[].length > 0 ? (
-                <></>
+            <h2 style={{ textAlignLast: "center", textAlign: "center" }}>
+              {!collectionNames[0] ? (
+                "Create a collection to be able to upload a video"
               ) : (
-                // [].map((uploadedVideo) => (
-                //   // <img
-                //   //   key={uploadedVideo.videoId}
-                //   //   src={fileToImgSrc(uploadedVideo.pic)}
-                //   //   alt={`${uploadedVideo.name} - ${uploadedVideo.caption}`}
-                //   //   role="button"
-                //   //   onClick={() => handleShowVideoPreview(uploadedVideo)}
-                //   // />
-                // ))
-                <div className="no-results">
-                  No videos yet
+                <Select
+                  placeholder={selectedOption}
+                  components={{
+                    DropdownIndicator: () => null,
+                    IndicatorSeparator: () => null,
+                  }}
+                  styles={customStyles}
+                  onChange={(val) => {
+                    setSelectedOption(val?.label || "Collections");
+                  }}
+                  options={actions}
+                  menuPlacement="top"
+                  classNamePrefix="select"
+                  theme={(theme) => ({
+                    ...theme,
+                    borderRadius: 0,
+                    colors: {
+                      ...theme.colors,
+                      text: "#3599B8",
+                      font: "#3599B8",
+                      primary25: "#3599B8",
+                      primary: "#3599B8",
+                      neutral80: "black",
+                      color: "black",
+                    },
+                  })}
+                />
+              )}
+            </h2>
+            {selectedOption === "Collections" && (
+              <>
+                <div className="create">
                   {isCurrentUserProfile && (
-                    <Link to="/upload">
-                      <button className="primary">Upload one now!</button>
+                    <Link to="/create_collection">
+                      <button
+                        className="primary"
+                        style={{ height: "40px", marginBottom: "10px" }}
+                      >
+                        Create new collection!
+                      </button>
                     </Link>
                   )}
                 </div>
-              )}
-            </section>
+                <div className="collections"></div>
+              </>
+            )}
+            {selectedOption !== "Collections" && (
+              <section className="profile-videos">
+                {[].length > 0 ? (
+                  <></>
+                ) : (
+                  // [].map((uploadedVideo) => (
+                  //   // <img
+                  //   //   key={uploadedVideo.videoId}
+                  //   //   src={fileToImgSrc(uploadedVideo.pic)}
+                  //   //   alt={`${uploadedVideo.name} - ${uploadedVideo.caption}`}
+                  //   //   role="button"
+                  //   //   onClick={() => handleShowVideoPreview(uploadedVideo)}
+                  //   // />
+                  // ))
+                  <div className="no-results">
+                    No videos yet
+                    {isCurrentUserProfile && collectionNames.length > 0 && (
+                      <Link to="/upload">
+                        <button className="primary">Upload one now!</button>
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </section>
+            )}
           </>
         )}
-        {activeSubView === 3 && (
+        {activeSubView === 2 && (
           <section className="followers">
             {followers.length > 0 ? (
               followers.map((follower) => (
@@ -294,7 +324,7 @@ export function Profile({ currentUser }) {
             )}
           </section>
         )}
-        {activeSubView === 4 && (
+        {activeSubView === 3 && (
           <section className="following">
             {following.length > 0 ? (
               following.map((following) => (
