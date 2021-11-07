@@ -67,9 +67,11 @@ export function Profile({ currentUser }) {
       setLoading(true);
       await getUserProfile(currentUserId).then((res) => {
         setUserProfile(res);
+        let arr = [{ label: "Collections", value: 0 }];
         res?.collectionNames?.map((val, idx) => {
-          actions.push({ label: val, value: idx });
+          arr.push({ label: val, value: idx });
         });
+        setActions(arr);
       });
     } catch (error) {
       console.error(
@@ -112,11 +114,13 @@ export function Profile({ currentUser }) {
     option: (provided, state) => ({
       ...provided,
       borderBottom: "1px dotted pink",
-      color: state.isSelected ? "red" : "blue",
+      color: state.isSelected ? "grey" : "black",
       padding: 2,
+      "&:hover": {
+        backgroundColor: "#F5F5F5",
+      },
     }),
-    control: () => ({
-      // none of react-select's styles are passed to <Control />
+    control: (base) => ({
       width: 400,
     }),
     singleValue: (provided, state) => {
@@ -232,8 +236,25 @@ export function Profile({ currentUser }) {
                 <Select
                   placeholder={selectedOption}
                   components={{
-                    DropdownIndicator: () => null,
                     IndicatorSeparator: () => null,
+                    DropdownIndicator: () => {
+                      return (
+                        <div
+                          style={{
+                            position: "relative",
+                            top: "-22px",
+                            marginLeft: "260px",
+                            width: "0",
+                            height: "0",
+                            borderLeft: "7px solid transparent",
+                            borderRight: "7px solid transparent",
+                            borderTop: "7px solid grey",
+                          }}
+                        >
+                          {" "}
+                        </div>
+                      );
+                    },
                   }}
                   styles={customStyles}
                   onChange={(val) => {
@@ -247,12 +268,8 @@ export function Profile({ currentUser }) {
                     borderRadius: 0,
                     colors: {
                       ...theme.colors,
-                      text: "#3599B8",
-                      font: "#3599B8",
-                      primary25: "#3599B8",
-                      primary: "#3599B8",
-                      neutral80: "black",
-                      color: "black",
+                      primary: "white",
+                      neutral80: "grey",
                     },
                   })}
                 />
