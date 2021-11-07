@@ -7,6 +7,7 @@ import { ProfilePic } from "../components/ProfilePic";
 import { Video } from "../components/Video";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { FollowButton } from "../components/FollowButton";
+import { PartnerRow } from "../components/PartnerRow";
 import {
   fileToImgSrc,
   follow,
@@ -211,14 +212,16 @@ export function Profile({ currentUser }) {
         {activeSubView === 0 && (
           <section className="partners">
             {partners.length > 0 ? (
-              partners.map((follower) => (
-                <FollowUserRow
-                  key={follower.userName}
-                  userName={follower.userName}
+              partners.map((partner) => (
+                <PartnerRow
+                  key={partner.split(" ")[1]}
+                  partnerId={partner.split(" ")[1]}
+                  partnerEmail={partner.split(" ")[0]}
                   handleFollow={handleFollow}
                   following={false}
-                  // following={currentUserFollows.includes(follower.userName)}
-                  disableFollow={follower.userName === currentUser?.userName}
+                  disableFollow={false}
+                  // following={currentUserFollows.includes(partner.userName)}
+                  // disableFollow={partner.userName === currentUser?.userName}
                 />
               ))
             ) : (
