@@ -41,9 +41,6 @@ export function Profile({ currentUser }) {
   const { goBack } = useHistory();
 
   const [userProfile, setUserProfile] = useState<any>();
-  const [userChannel, setUserChannel] = useState<any>();
-  const [userChannelNames, setUserChannelNames] = useState<any>();
-  const [userChannelIds, setUserChannelIds] = useState<any>();
   const [profilePic, setProfilePic] = useState("");
   const [videoPreview, setVideoPreview] = useState<VideoInfo>();
   const [isLoading, setLoading] = useState(false);
