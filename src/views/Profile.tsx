@@ -52,7 +52,7 @@ export function Profile({ currentUser }) {
   const initialIsFollowed = false;
   // currentUserFollows.indexOf(userId || "") !== -1;
   const [isFollowed, setIsFollowed] = useState(initialIsFollowed);
-
+  const [actions, setActions] = useState([{ label: "Collections", value: 0 }]);
   const [selectedOption, setSelectedOption] = useState<string>("Collections");
 
   const isCurrentUserProfile = !userId || userId === auth.currentUser?.uid;
@@ -67,6 +67,9 @@ export function Profile({ currentUser }) {
       setLoading(true);
       await getUserProfile(currentUserId).then((res) => {
         setUserProfile(res);
+        res?.collectionNames?.map((val, idx) => {
+          actions.push({ label: val, value: idx });
+        });
       });
     } catch (error) {
       console.error(
@@ -104,13 +107,6 @@ export function Profile({ currentUser }) {
     setIsFollowed((state) => !state);
     // handleFollow(userName, !isFollowed);
   }
-
-  const actions = [
-    { label: "Collections", value: 0 },
-    { label: "Add", value: 1 },
-    { label: "Edit", value: 2 },
-    { label: "Delete", value: 3 },
-  ];
 
   const customStyles = {
     option: (provided, state) => ({
