@@ -107,7 +107,7 @@ export function SignIn() {
           />
           <input
             ref={passwordInputRef}
-            type="text"
+            type="password"
             name="password"
             id="password"
             placeholder="password"

@@ -33,7 +33,7 @@ const video1 = {
   superLikes: [],
   uploadedAt: 12234,
   videoId: "111",
-  url: "https://firebasestorage.googleapis.com/v0/b/tiktok-a2bdb.appspot.com/o/videos%2FTiJUcyMJ9cCSv5DZoJrl?alt=media&token=72c9aff3-70c4-4b44-9551-f554f2e39162",
+  url: "https://v77.tiktokcdn.com/4ef84321231ff2293f678e8b995b7f0c/618aba50/video/tos/useast2a/tos-useast2a-ve-0068c001/ea900decb74c427a89374f03ffac934e/?a=1233&br=2220&bt=1110&cd=0%7C0%7C1&ch=0&cr=0&cs=0&cv=1&dr=0&ds=3&er=&ft=wZ~R.FhUkag3-I&l=202111091213200101902182260C06D23E&lr=tiktok_m&mime_type=video_mp4&net=0&pl=0&qs=0&rc=MzN2dWQ6Zjl3NzMzNzczM0ApOjtpO2hnODw5N2Y2aTU1aWcuaXFscjQwaGdgLS1kMTZzc18uLTZhLWMxLzJhYi00M2E6Yw%3D%3D&vl=&vr=",
 };
 const video2 = {
   userId: "tepa",
@@ -47,7 +47,7 @@ const video2 = {
   superLikes: [],
   uploadedAt: 12235,
   videoId: "112",
-  url: "https://v16m.tiktokcdn.com/25b03122c5f588431fc587a4258530a3/617da1f5/video/tos/useast2a/tos-useast2a-ve-0068c002/dfd834e567cf4d2bb24ec318714fd291/?a=1233&br=2540&bt=1270&cd=0%7C0%7C1&ch=0&cr=0&cs=0&cv=1&dr=0&ds=3&er=&ft=98CxdeTw4kag3&l=202110301349590101890731043B2AF445&lr=tiktok_m&mime_type=video_mp4&net=0&pl=0&qs=0&rc=amVmbjU6ZjNvNzMzNzczM0ApNDQ8ZGloZjtmNzQ7PDtoO2cxZG1tcjRvanNgLS1kMTZzczRjYjMtXmBiMDNjLTYuXzI6Yw%3D%3D&vl=&vr=",
+  url: "https://v16m.tiktokcdn.com/07dd7c60378ba486e7ac986ef5782133/618ab9cc/video/tos/useast2a/tos-useast2a-pve-0068/afe3e6a4ffcc4da3a1c905dd8af30835/?a=1233&br=1182&bt=591&cd=0%7C0%7C1&ch=0&cr=0&cs=0&cv=1&dr=0&ds=3&er=&ft=wZ~R.FhUkag3-I&l=202111091211130101890730455D06BFA5&lr=tiktok_m&mime_type=video_mp4&net=0&pl=0&qs=0&rc=amU8PDQ6ZjZqNzMzNzczM0ApOjdlZTszPGQ4N2hlM2Y4OmcyZTVucjRvb21gLS1kMTZzc14zMTNeMV5gLmI0XmEtL2I6Yw%3D%3D&vl=&vr=",
 };
 
 /*
@@ -60,7 +60,7 @@ export function Feed({
   profileInfo?: ProfileInfoPlus;
   onRefreshUser: any;
 }) {
-  const [feed, setFeed] = useState<firebase.storage.Reference[]>([]);
+  const [feed, setFeed] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -68,9 +68,8 @@ export function Feed({
     if (auth.currentUser?.email) {
       setIsLoading(true);
       getFeedVideos("tepa").then((videos) => {
-        console.log("videos");
-        console.log(videos[0]);
         setFeed(videos);
+        // setFeed([videos[0]]);
       });
       setIsLoading(false);
       // })

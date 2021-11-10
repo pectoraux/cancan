@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   createVideo,
   getVideoInfo,
+  addUploadedVideo,
   putVideoChunk,
   putVideoPic,
   putProfilePic,
@@ -14,18 +15,20 @@ import firebase from "firebase";
 export function getVideoInit(
   userId: string,
   file: File,
+  collectionName: string,
   caption: string
 ): VideoInit {
   const chunkCount = Number(Math.ceil(file.size / MAX_CHUNK_SIZE));
+  const timestamp = Number(Date.now() * 1000);
   return {
     userId,
     caption,
     // @ts-ignore
-    collectionId,
+    collectionName,
     // chunkCount,
     // @ts-ignore
-    createdAt: Number(Date.now() * 1000), // motoko is using nanoseconds
-    name: file.name.replace(/\.mp4/, ""),
+    createdAt: timestamp, // motoko is using nanoseconds
+    name: collectionName + " " + timestamp,
     tags: caption.match(hashtagRegExp) || [],
   };
 }
@@ -54,15 +57,19 @@ async function processAndUploadChunk(
 }
 
 // Wraps up the previous functions into one step for the UI to trigger
-async function uploadVideo(userId: string, file: File, caption: string) {
+async function uploadVideo(
+  userId: string,
+  file: File,
+  caption: string,
+  collectionName: string
+) {
   const videoBuffer = (await file?.arrayBuffer()) || new ArrayBuffer(0);
 
-  const videoInit = getVideoInit(userId, file, caption);
-  const videoId = await createVideo(videoInit);
-
-  let chunk = 1;
+  const videoInit = getVideoInit(userId, file, collectionName, caption);
   const thumb = await generateThumbnail(file);
-  const result = await uploadVideoPic(videoId, thumb);
+  const videoId = await createVideo(videoInit);
+  const picUrl = await uploadVideoPic(videoId, thumb);
+  let chunk = 1;
   var metadata = {
     contentType: "video/mp4",
   };
@@ -93,7 +100,7 @@ async function uploadVideo(userId: string, file: File, caption: string) {
   // await Promise.all(putChunkPromises);
 
   // return await checkVidFromIC(videoId, userId);
-  return result;
+  return `${videoId} ${videoInit.name} ${picUrl}`;
 }
 
 // This isn't Internet Computer specific, just a helper to generate an image
@@ -145,8 +152,9 @@ async function uploadVideoPic(videoId: string | void, file: number[]) {
   console.log("Storing video thumbnail...");
   try {
     if (videoId) {
-      await putVideoPic(videoId, file);
       console.log(`Video thumbnail stored for ${videoId}`);
+      const picUrl = await putVideoPic(videoId, file);
+      return picUrl;
     }
   } catch (error) {
     console.error("Unable to store video thumbnail:", error);
@@ -171,7 +179,7 @@ export async function uploadProfilePic(userId: string | void, file: File) {
 // Gets videoInfo from the IC after we've uploaded
 async function checkVidFromIC(videoId: string, userId: string) {
   console.log("Checking canister for uploaded video...");
-  const resultFromCanCan = await getVideoInfo(userId, videoId);
+  const resultFromCanCan = null; //await getVideoInfo(userId, videoId);
   if (resultFromCanCan === null) {
     throw Error("Invalid video received from CanCan Canister");
   }
@@ -181,8 +189,14 @@ async function checkVidFromIC(videoId: string, userId: string) {
 
 // This hook exposes functions to set video data, trigger the upload, and return
 // with "success" to toggle loading states.
-export function useUploadVideo({ userId }: { userId: string }) {
-  const [completedVideo, setCompletedVideo] = useState<VideoInfo | void>();
+export function useUploadVideo({
+  userId,
+  collectionName,
+}: {
+  userId: string;
+  collectionName: string;
+}) {
+  const [completedVideo, setCompletedVideo] = useState<any>();
   const [file, setFile] = useState<File>();
   const [caption, setCaption] = useState("");
   const [ready, setReady] = useState(false);
@@ -191,9 +205,12 @@ export function useUploadVideo({ userId }: { userId: string }) {
     console.info("Storing video...");
     try {
       console.time("Stored in");
-      const video = await uploadVideo(userId, fileToUpload, caption);
-
-      // setCompletedVideo(video);
+      uploadVideo(userId, fileToUpload, caption, collectionName).then(
+        async (videoInfo) => {
+          await addUploadedVideo(userId, videoInfo);
+          setCompletedVideo(videoInfo);
+        }
+      );
       setReady(false);
       setFile(undefined);
       console.timeEnd("Stored in");

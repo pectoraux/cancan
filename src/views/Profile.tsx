@@ -13,7 +13,8 @@ import {
   follow,
   getProfilePic,
   getUserProfile,
-  getUserChannel,
+  getVideoInfo,
+  getFeedVideo,
   formatBigNumber,
 } from "../utils";
 import backIcon from "../assets/images/icon-back.png";
@@ -42,7 +43,7 @@ export function Profile({ currentUser }) {
 
   const [userProfile, setUserProfile] = useState<any>();
   const [profilePic, setProfilePic] = useState("");
-  const [videoPreview, setVideoPreview] = useState<VideoInfo>();
+  const [videoPreview, setVideoPreview] = useState<any>();
   const [isLoading, setLoading] = useState(false);
 
   const currentUserFollows = [];
@@ -55,8 +56,11 @@ export function Profile({ currentUser }) {
 
   const isCurrentUserProfile = !userId || userId === auth.currentUser?.uid;
 
-  function handleShowVideoPreview(clickedVideo: VideoInfo) {
-    setVideoPreview(clickedVideo);
+  function handleShowVideoPreview(videoId: string) {
+    getFeedVideo(videoId).then((res) => {
+      console.log(res);
+      setVideoPreview(res);
+    });
   }
 
   async function fetchUserProfile() {
@@ -68,6 +72,7 @@ export function Profile({ currentUser }) {
         let arr = [{ label: "Collections", value: 0 }];
         res?.collectionNames?.map((val, idx) => {
           arr.push({ label: val, value: idx });
+          setSelectedOption(val);
         });
         setActions(arr);
       });
@@ -85,7 +90,7 @@ export function Profile({ currentUser }) {
     try {
       const picData = await getProfilePic(userId || "");
       if (picData !== null) {
-        const imgSrc = fileToImgSrc([picData]);
+        const imgSrc = fileToImgSrc("");
         setProfilePic(imgSrc);
       } else {
         console.info(`No profile pic set for user ${userId}`);
@@ -154,14 +159,12 @@ export function Profile({ currentUser }) {
         />
         {videoPreview && (
           <Video
-            userId={userName}
-            userRewardPoints={
-              (currentUser && Number(currentUser.rewards.toString())) || 0
-            }
+            userId={userId}
+            userRewardPoints={0}
             videoInfo={videoPreview}
             isPreview={true}
-            onClose={() => setVideoPreview(undefined)}
-            key={videoPreview.videoId}
+            onClose={() => setVideoPreview("")}
+            key={videoPreview}
           />
         )}
         <div className="profile-header">
@@ -294,18 +297,22 @@ export function Profile({ currentUser }) {
             )}
             {selectedOption !== "Collections" && (
               <section className="profile-videos">
-                {[].length > 0 ? (
-                  <></>
+                {uploadedVideos.length > 0 ? (
+                  uploadedVideos.map((uploadedVideo) => (
+                    <img
+                      key={uploadedVideo.split(" ")[0]}
+                      src={fileToImgSrc(uploadedVideo.split(" ")[3])}
+                      alt={`${
+                        uploadedVideo.split(" ")[1] -
+                        uploadedVideo.split(" ")[2]
+                      }`}
+                      role="button"
+                      onClick={() =>
+                        handleShowVideoPreview(uploadedVideo.split(" ")[0])
+                      }
+                    />
+                  ))
                 ) : (
-                  // [].map((uploadedVideo) => (
-                  //   // <img
-                  //   //   key={uploadedVideo.videoId}
-                  //   //   src={fileToImgSrc(uploadedVideo.pic)}
-                  //   //   alt={`${uploadedVideo.name} - ${uploadedVideo.caption}`}
-                  //   //   role="button"
-                  //   //   onClick={() => handleShowVideoPreview(uploadedVideo)}
-                  //   // />
-                  // ))
                   <div className="no-results">
                     No videos yet
                     {isCurrentUserProfile && collectionNames.length > 0 && (

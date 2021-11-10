@@ -14,7 +14,6 @@ import { Redirect, Route, Switch } from "react-router-dom";
 import { AuthContext } from "src/utils";
 // import { getAuth } from "@firebase/auth";
 import { auth } from "src/utils/firebase";
-import { CreateChannel } from "./CreateChannel";
 import { CreateCollection } from "./CreateCollection";
 import { getUserProfile } from "src/utils/canister";
 import { NFTickets } from "src/views/NFTickets";
@@ -52,10 +51,6 @@ export function PrivateRoutes({ location, isAuthenticated }) {
     {
       path: "/upload",
       render: () => <Upload onUpload={refreshProfileInfo} user={userProfile} />,
-    },
-    {
-      path: "/create_channel",
-      render: () => <CreateChannel user={userProfile} />,
     },
     {
       path: "/upload_profile",

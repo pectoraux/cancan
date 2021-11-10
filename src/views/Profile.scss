@@ -94,9 +94,10 @@
   display: flex;
   flex-wrap: wrap;
   background-color: #d9d9da;
-  padding: 1px 0 0;
-  height: 40rem;
-  overflow: auto;
+  padding: 1px 1px 1px 2px;
+  height: 25rem;
+  padding-bottom: 10rem;
+  overflow-y: auto;
 
   img {
     width: calc((100% - 2px) / 3);
@@ -133,16 +134,15 @@
   background-color: #d9d9da;
   color: #333;
   font-size: 1.8rem;
-  position: relative;
-  top: -80px;
-  margin-bottom: 10rem;
+  // position: relative;
+  // top: -80px;
+  // margin-bottom: 10rem;
   > * {
     margin-top: 2rem;
   }
 }
 
 .followers,
-.channels,
 .partners,
 .collections,
 .following {

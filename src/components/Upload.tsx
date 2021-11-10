@@ -1,10 +1,12 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ProfileInfoPlus } from "../utils/canister/typings";
-import { useUploadVideo } from "../utils";
+import { useUploadVideo, getUserProfile } from "../utils";
 import { LoadingIndicator } from "./LoadingIndicator";
 import "./Upload.scss";
 import backIcon from "../assets/images/icon-back.png";
+import Select from "react-select";
+import { auth } from "src/utils/firebase";
 
 /*
  * Allows selection of a file followed by the option to add a caption before
@@ -24,12 +26,26 @@ export function Upload({
   const [uploadingClean, setUploadingClean] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [selectedOption, setSelectedOption] = useState<string>("Collections");
+  const [actions, setActions] = useState([{ label: "Collections", value: 0 }]);
+  const [userProfile, setUserProfile] = useState<any>();
+
   const videoUploadController = useUploadVideo({
-    userId: user?.userName || "",
+    userId: auth.currentUser?.uid || "",
+    collectionName: selectedOption,
   });
 
   useEffect(() => {
     inputRef.current?.click();
+    getUserProfile(auth.currentUser?.uid!).then((res) => {
+      setUserProfile(res);
+      let arr = [{ label: "Collections", value: 0 }];
+      res?.collectionNames?.map((val, idx) => {
+        arr.push({ label: val, value: idx });
+        setSelectedOption(val);
+      });
+      setActions(arr);
+    });
   }, []);
 
   useEffect(() => {
@@ -58,6 +74,18 @@ export function Upload({
       setVideoFile(file);
     }
   }
+
+  const customStyles = {
+    option: (provided, state) => ({
+      ...provided,
+      borderBottom: "1px dotted pink",
+      color: state.isSelected ? "grey" : "black",
+      padding: 2,
+      "&:hover": {
+        backgroundColor: "#F5F5F5",
+      },
+    }),
+  };
 
   // Wraps and triggers several functions in the videoUploadController to
   // generate a videoId and begin uploading.
@@ -113,6 +141,45 @@ export function Upload({
         <div className="video-add-details">
           <video src={videoPreviewURL} muted autoPlay loop />
           <div className="details-entry">
+            <Select
+              placeholder={selectedOption}
+              components={{
+                IndicatorSeparator: () => null,
+                DropdownIndicator: () => {
+                  return (
+                    <div
+                      style={{
+                        marginLeft: "260px",
+                        width: "0",
+                        height: "0",
+                        borderLeft: "7px solid transparent",
+                        borderRight: "7px solid transparent",
+                        borderTop: "7px solid grey",
+                      }}
+                    >
+                      {" "}
+                    </div>
+                  );
+                },
+              }}
+              styles={customStyles}
+              onChange={(val) => {
+                setSelectedOption(val?.label || "Collections");
+              }}
+              options={actions}
+              menuPlacement="top"
+              classNamePrefix="select"
+              theme={(theme) => ({
+                ...theme,
+                borderRadius: 0,
+                colors: {
+                  ...theme.colors,
+                  primary: "white",
+                  neutral80: "grey",
+                },
+              })}
+            />
+            <br />
             <textarea
               className="caption-content"
               ref={textAreaRef}

@@ -74,7 +74,7 @@ export function NFTickets({ currentUser }) {
     try {
       const picData = await getProfilePic(userId || "");
       if (picData !== null) {
-        const imgSrc = fileToImgSrc([picData]);
+        const imgSrc = fileToImgSrc("");
         setProfilePic(imgSrc);
       } else {
         console.info(`No profile pic set for user ${userId}`);
@@ -167,37 +167,35 @@ export function NFTickets({ currentUser }) {
           </section>
         </div>
         {activeSubView === 0 && (
-          <section className="profile-videos">
+          <section className="profile-videos" style={{ height: "35rem" }}>
             {[].length > 0 ? (
-              <></>
+              [].map((uploadedVideo) => (
+                <img
+                  key={uploadedVideo}
+                  src={fileToImgSrc(uploadedVideo)}
+                  // alt={`${uploadedVideo.name} - ${uploadedVideo.caption}`}
+                  role="button"
+                  onClick={() => handleShowVideoPreview(uploadedVideo)}
+                />
+              ))
             ) : (
-              // [].map((uploadedVideo) => (
-              //   // <img
-              //   //   key={uploadedVideo.videoId}
-              //   //   src={fileToImgSrc(uploadedVideo.pic)}
-              //   //   alt={`${uploadedVideo.name} - ${uploadedVideo.caption}`}
-              //   //   role="button"
-              //   //   onClick={() => handleShowVideoPreview(uploadedVideo)}
-              //   // />
-              // ))
               <div className="no-results">No active NFTickets yet</div>
             )}
           </section>
         )}
         {activeSubView === 1 && (
-          <section className="profile-videos">
+          <section className="profile-videos" style={{ height: "35rem" }}>
             {[].length > 0 ? (
-              <></>
+              [].map((uploadedVideo) => (
+                <img
+                  key={uploadedVideo}
+                  src={fileToImgSrc(uploadedVideo)}
+                  // alt={`${uploadedVideo.name} - ${uploadedVideo.caption}`}
+                  role="button"
+                  onClick={() => handleShowVideoPreview(uploadedVideo)}
+                />
+              ))
             ) : (
-              // [].map((uploadedVideo) => (
-              //   // <img
-              //   //   key={uploadedVideo.videoId}
-              //   //   src={fileToImgSrc(uploadedVideo.pic)}
-              //   //   alt={`${uploadedVideo.name} - ${uploadedVideo.caption}`}
-              //   //   role="button"
-              //   //   onClick={() => handleShowVideoPreview(uploadedVideo)}
-              //   // />
-              // ))
               <div className="no-results">No finished NFTickets yet</div>
             )}
           </section>

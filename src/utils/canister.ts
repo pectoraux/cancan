@@ -71,13 +71,12 @@ export async function createCollection(userId: string, name: string) {
     });
 }
 
-export async function addChannel(userId: string, id: string, name: string) {
+export async function addUploadedVideo(userId: string, videoInfo: any) {
   return firestore
     .collection("profiles")
     .doc(userId)
     .update({
-      channelIds: firebase.firestore.FieldValue.arrayUnion(id),
-      channelNames: firebase.firestore.FieldValue.arrayUnion(name),
+      uploadedVideos: firebase.firestore.FieldValue.arrayUnion(videoInfo),
     });
 }
 
@@ -203,17 +202,32 @@ export async function getFeedVideos(
   return videos;
 }
 
-export async function getVideoInfo(userId: string, videoId: string) {
-  const videoInfo = {};
-  // unwrap(
-  //   await (await CanCan.actor).getVideoInfo([userId], videoId)
+export async function getFeedVideo(
+  videoId: string
+): Promise<firebase.storage.Reference> {
+  // Create a reference with an initial file path and name
+  var storage = firebase.storage();
+  var video = await (await storage.ref("videos")).child(videoId);
+  // unwrap<VideoResults>(
+  //   await (await CanCan.actor).getFeedVideos(userId, [])
   // );
-  if (videoInfo !== null) {
-    return videoInfo;
-  } else {
-    throw Error("no video found with id: " + videoId);
-  }
+  return video;
 }
+
+export async function getVideoInfo(videoId: string) {
+  return firestore
+    .collection("videos")
+    .doc(videoId)
+    .get()
+    .then((doc) => {
+      return doc.data();
+    })
+    .catch((err) => {
+      console.error("no video found with id: " + videoId, err);
+      return null;
+    });
+}
+
 export async function getProfilePic(userId: string) {
   const profilePic = null; //unwrap(await (await CanCan.actor).getProfilePic(userId));
   return profilePic;
@@ -315,11 +329,12 @@ export async function putVideoPic(videoId: string, file: number[]) {
   // Create a root reference
   var storageRef = firebase.storage().ref();
   // Upload file and metadata to the object 'images/mountains.jpg'
-  var uploadTask = storageRef
+  return storageRef
     .child("images/" + videoId)
     .put(bytes, metadata)
     .then((snapshot) => {
       console.log("Uploaded an array!");
+      return snapshot.ref.getDownloadURL();
     });
 }
 

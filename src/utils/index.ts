@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Optional } from "./canister";
 
 export * from "./canister";
@@ -74,10 +75,27 @@ export function formatBigNumber(number: number): string {
 
 // Converts a file from a byteArray to a blob URL
 // TODO: Detect mime-type, "fileToBlobUrl" https://stackoverflow.com/a/29672957
-export function fileToImgSrc(file: [] | number[][], imgType = "jpeg"): string {
-  const byteArray = new Uint8Array(file[0]);
-  const picBlob = new Blob([byteArray], { type: `image/${imgType}` });
-  const picSrc = URL.createObjectURL(picBlob);
+export function fileToImgSrc(picUrl: string, imgType = "jpeg"): string {
+  // const byteArray = new Uint8Array(file[0]);
+  // const picBlob = new Blob([byteArray], { type: `image/${imgType}` });
+  // const picSrc = URL.createObjectURL(picBlob);
   // return picSrc;
-  return "https://jpeg.org/images/jpeg-home.jpg";
+  return picUrl ? picUrl : "https://jpeg.org/images/jpeg-home.jpg";
+}
+
+export function useOnScreen(ref) {
+  const [isIntersecting, setIntersecting] = useState(false);
+  const observer = new IntersectionObserver(([entry]) =>
+    setIntersecting(entry.isIntersecting)
+  );
+
+  useEffect(() => {
+    observer.observe(ref.current);
+    // Remove observer as soon as the component is unmounted
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  return isIntersecting;
 }

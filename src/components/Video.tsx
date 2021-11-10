@@ -6,7 +6,13 @@ import SuperLikeButton from "./SuperLikeButton";
 import TippingButton from "./TippingButton";
 import { ProfilePic } from "./ProfilePic";
 import { SuperLikeEffect } from "./SuperLikeEffect";
-import { getVideoChunks, getProfilePic, like, superLike } from "../utils";
+import {
+  getVideoChunks,
+  getProfilePic,
+  like,
+  superLike,
+  useOnScreen,
+} from "../utils";
 import likeIcon from "../assets/images/icon-like.png";
 import commentIcon from "../assets/images/icon-comment.png";
 import shareIcon from "../assets/images/icon-share.png";
@@ -77,6 +83,7 @@ function VideoBase(props: VideoProps) {
   const videoIsFlagged = false; //videoInfo.abuseFlagCount >= VIDEO_BLUR_MIN;
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const isVisible = useOnScreen(videoRef);
 
   const handlePlayClick = function () {
     setPlay(!play);
@@ -106,12 +113,16 @@ function VideoBase(props: VideoProps) {
     return () => videoRef.current?.pause();
   }, [videoInfo?.videoId]);
 
+  useEffect(() => {
+    setPlay(isVisible);
+  }, [isVisible]);
+
   // Only play video if it has not been flagged/reported
   useEffect(() => {
     if (!videoIsFlagged) {
       play ? videoRef.current?.play() : videoRef.current?.pause();
     }
-  }, [play]);
+  }, [play, videoRef]);
 
   function handleLike() {
     // like(userId, videoInfo.videoId, !userLikes);
@@ -142,9 +153,7 @@ function VideoBase(props: VideoProps) {
         onClick={handlePlayClick}
         ref={videoRef}
         src={videoSourceURL}
-        loop={false}
-        muted={false}
-        autoPlay={false}
+        loop={true}
         style={videoBlurStyle}
       />
       <div className="user-details">
