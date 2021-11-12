@@ -15,8 +15,11 @@ import { AuthContext } from "src/utils";
 // import { getAuth } from "@firebase/auth";
 import { auth } from "src/utils/firebase";
 import { CreateCollection } from "./CreateCollection";
+import { CreateCategory } from "./CreateCategory";
+import { CreatePartner } from "./CreatePartner";
 import { getUserProfile } from "src/utils/canister";
 import { NFTickets } from "src/views/NFTickets";
+import { Comments } from "./Comments";
 
 function wrapPrivateRouteWithSlide(render) {
   return ({ match }) => (
@@ -59,8 +62,22 @@ export function PrivateRoutes({ location, isAuthenticated }) {
       ),
     },
     {
+      path: "/comments",
+      render: () => (
+        <Comments onUpload={refreshProfileInfo} user={userProfile} />
+      ),
+    },
+    {
       path: "/create_collection",
       render: () => <CreateCollection user={userProfile} />,
+    },
+    {
+      path: "/create_category",
+      render: () => <CreateCategory user={userProfile} />,
+    },
+    {
+      path: "/create_partner",
+      render: () => <CreatePartner user={userProfile} />,
     },
     {
       path: "/nftickets",

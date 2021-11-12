@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ProfilePic } from "./ProfilePic";
 import { PartnerButton } from "./PartnerButton";
 import "./FollowUserRow.scss";
+import ReactReadMoreReadLess from "react-read-more-read-less";
 
 /*
  * A single instance of a row in the Followers/Following Profile views. Displays
@@ -34,9 +35,23 @@ export function PartnerRow({
 
   return (
     <Link to={disableFollow ? "/profile" : `/profiles/${partnerId}`}>
-      <div className="follow-row">
+      <div
+        className="follow-row"
+        style={{ paddingBottom: "90px", paddingTop: "90px" }}
+      >
         <ProfilePic profilePic="" name={partnerId} clickable={false} />
-        <span className="username">{partnerEmail}</span>
+        <span
+          className="username"
+          style={{ display: "block", fontSize: "10px" }}
+        >
+          <span style={{ font: "caption" }}> {partnerEmail} </span> <br />
+          djskdjskjd skdjsdksdk skdjskj jksdjk skdjkdjs djskdjskjd skdjsdksdk
+          skdjskj jksdjk skdjkdjs djskdjskjd skdjsdksdk skdjskj jksdjk skdjkdjs
+          djskdjskjd skdjsdksdk skdjskj jksdjk skdjkdjs djskdjskjd skdjsdksdk
+          skdjskj jksdjk skdjkdjs djskdjskjd skdjsdksdk skdjskj jksdjk
+          skdjkdjsdjskdjskjd skdjsdksdk skdjskj jksdjk skdjkdjs djskdjskjd
+          skdjsdksdk skdjskj jksdjk skdjkdjs
+        </span>
         {disableFollow ? (
           <div />
         ) : (

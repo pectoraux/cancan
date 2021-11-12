@@ -231,7 +231,7 @@ function VideoBase(props: VideoProps) {
                 : 0)}
           </span> */}
         </div>
-        <span onClick={() => console.log("Hello")}>
+        <Link to="/comments">
           <div className="feed-control">
             <img
               src={commentIcon}
@@ -244,7 +244,7 @@ function VideoBase(props: VideoProps) {
             {/* <span>{videoInfo.comments?.length ?? 0}</span> */}
             <span>2</span>
           </div>
-        </span>
+        </Link>
         <div className="feed-control">
           <img
             src={shareIcon}

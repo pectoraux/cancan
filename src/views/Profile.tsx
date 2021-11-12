@@ -23,6 +23,7 @@ import { ProfileInfoPlus, VideoInfo } from "../utils/canister/typings";
 // import { getAuth } from "@firebase/auth";
 import { auth } from "src/utils/firebase";
 import Select from "react-select";
+import { PartnerButton } from "src/components/PartnerButton";
 
 type ProfileByIdParams = {
   userId: string;
@@ -52,13 +53,22 @@ export function Profile({ currentUser }) {
   // currentUserFollows.indexOf(userId || "") !== -1;
   const [isFollowed, setIsFollowed] = useState(initialIsFollowed);
   const [actions, setActions] = useState([{ label: "Collections", value: 0 }]);
+  const [gender, setGender] = useState([
+    { label: "Genders", value: 0 },
+    { label: "Male", value: 1 },
+    { label: "Female", value: 2 },
+  ]);
+  const [categories, setCategories] = useState([
+    { label: "Categories", value: 0 },
+  ]);
   const [selectedOption, setSelectedOption] = useState<string>("Collections");
+  const [selectedOption2, setSelectedOption2] = useState<string>("Categories");
+  const [selectedOption3, setSelectedOption3] = useState<string>("Genders");
 
   const isCurrentUserProfile = !userId || userId === auth.currentUser?.uid;
 
   function handleShowVideoPreview(videoId: string) {
     getFeedVideo(videoId).then((res) => {
-      console.log(res);
       setVideoPreview(res);
     });
   }
@@ -70,11 +80,17 @@ export function Profile({ currentUser }) {
       await getUserProfile(currentUserId).then((res) => {
         setUserProfile(res);
         let arr = [{ label: "Collections", value: 0 }];
+        let arr2 = [{ label: "Categories", value: 0 }];
         res?.collectionNames?.map((val, idx) => {
           arr.push({ label: val, value: idx });
-          setSelectedOption(val);
+        });
+        res?.categories?.map((val, idx) => {
+          arr2.push({ label: val, value: idx });
         });
         setActions(arr);
+        setCategories(arr2);
+        setSelectedOption(arr[0].label);
+        setSelectedOption2(arr2[0].label);
       });
     } catch (error) {
       console.error(
@@ -120,7 +136,7 @@ export function Profile({ currentUser }) {
       color: state.isSelected ? "grey" : "black",
       padding: 2,
       "&:hover": {
-        backgroundColor: "#F5F5F5",
+        backgroundColor: "#b0eff556",
       },
     }),
     control: (base) => ({
@@ -210,24 +226,106 @@ export function Profile({ currentUser }) {
           </section>
         </div>
         {activeSubView === 0 && (
-          <section className="partners">
-            {partners.length > 0 ? (
-              partners.map((partner) => (
-                <PartnerRow
-                  key={partner.split(" ")[1]}
-                  partnerId={partner.split(" ")[1]}
-                  partnerEmail={partner.split(" ")[0]}
-                  handleFollow={handleFollow}
-                  following={false}
-                  disableFollow={false}
-                  // following={currentUserFollows.includes(partner.userName)}
-                  // disableFollow={partner.userName === currentUser?.userName}
+          <>
+            <h2 style={{ textAlignLast: "center", textAlign: "center" }}>
+              {!categories[0] ? (
+                "Create a category to be able to get partners"
+              ) : (
+                <Select
+                  placeholder={selectedOption2}
+                  components={{
+                    IndicatorSeparator: () => null,
+                    DropdownIndicator: () => {
+                      return (
+                        <div
+                          style={{
+                            position: "relative",
+                            top: "-22px",
+                            marginLeft: "260px",
+                            width: "0",
+                            height: "0",
+                            borderLeft: "7px solid transparent",
+                            borderRight: "7px solid transparent",
+                            borderTop: "7px solid grey",
+                          }}
+                        >
+                          {" "}
+                        </div>
+                      );
+                    },
+                  }}
+                  styles={customStyles}
+                  onChange={(val) => {
+                    setSelectedOption2(val?.label || "Category");
+                  }}
+                  options={categories}
+                  menuPlacement="top"
+                  classNamePrefix="select"
+                  theme={(theme) => ({
+                    ...theme,
+                    borderRadius: 0,
+                    colors: {
+                      ...theme.colors,
+                      primary: "white",
+                      neutral80: "grey",
+                    },
+                  })}
                 />
-              ))
-            ) : (
-              <div className="no-results">No partners yet!</div>
+              )}
+            </h2>
+            {selectedOption2 === "Categories" && (
+              <>
+                <div className="create">
+                  {!isCurrentUserProfile ? (
+                    <Link to="/create_category">
+                      <button
+                        className="primary"
+                        style={{ height: "40px", marginBottom: "10px" }}
+                      >
+                        Create new category!
+                      </button>
+                    </Link>
+                  ) : (
+                    <Link to="/create_partner">
+                      <button
+                        className="primary"
+                        style={{
+                          height: "40px",
+                          width: "300px",
+                          marginBottom: "10px",
+                        }}
+                      >
+                        Create partner request!
+                      </button>
+                    </Link>
+                  )}
+                </div>
+                <div className="Categories"></div>
+              </>
             )}
-          </section>
+            {selectedOption2 !== "Categories" && (
+              <section className="partners">
+                {partners.length > 0 ? (
+                  <div style={{ overflowY: "scroll", height: "180px" }}>
+                    {partners.map((partner) => (
+                      <PartnerRow
+                        key={partner.split(" ")[1]}
+                        partnerId={partner.split(" ")[1]}
+                        partnerEmail={partner.split(" ")[0]}
+                        handleFollow={handleFollow}
+                        following={false}
+                        disableFollow={false}
+                        // following={currentUserFollows.includes(partner.userName)}
+                        // disableFollow={partner.userName === currentUser?.userName}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="no-results">No partners yet!</div>
+                )}
+              </section>
+            )}
+          </>
         )}
 
         {activeSubView === 1 && (
@@ -327,22 +425,71 @@ export function Profile({ currentUser }) {
           </>
         )}
         {activeSubView === 2 && (
-          <section className="followers">
-            {followers.length > 0 ? (
-              followers.map((follower) => (
-                <FollowUserRow
-                  key={follower.userName}
-                  userName={follower.userName}
-                  handleFollow={handleFollow}
-                  following={false}
-                  // following={currentUserFollows.includes(follower.userName)}
-                  disableFollow={follower.userName === currentUser?.userName}
-                />
-              ))
-            ) : (
-              <div className="no-results">No followers yet!</div>
-            )}
-          </section>
+          <>
+            <h2 style={{ textAlignLast: "center", textAlign: "center" }}>
+              <Select
+                placeholder={selectedOption3}
+                components={{
+                  IndicatorSeparator: () => null,
+                  DropdownIndicator: () => {
+                    return (
+                      <div
+                        style={{
+                          position: "relative",
+                          top: "-22px",
+                          marginLeft: "260px",
+                          width: "0",
+                          height: "0",
+                          borderLeft: "7px solid transparent",
+                          borderRight: "7px solid transparent",
+                          borderTop: "7px solid grey",
+                        }}
+                      >
+                        {" "}
+                      </div>
+                    );
+                  },
+                }}
+                styles={customStyles}
+                onChange={(val) => {
+                  setSelectedOption3(val?.label || "Gender");
+                }}
+                options={gender}
+                menuPlacement="top"
+                classNamePrefix="select"
+                theme={(theme) => ({
+                  ...theme,
+                  borderRadius: 0,
+                  colors: {
+                    ...theme.colors,
+                    primary: "white",
+                    neutral80: "grey",
+                  },
+                })}
+              />
+            </h2>
+            <section className="followers">
+              {followers.length > 0 ? (
+                followers.map((follower) => (
+                  <FollowUserRow
+                    key={follower.userName}
+                    userName={follower.userName}
+                    handleFollow={handleFollow}
+                    following={false}
+                    // following={currentUserFollows.includes(follower.userName)}
+                    disableFollow={follower.userName === currentUser?.userName}
+                  />
+                ))
+              ) : (
+                <div
+                  className="no-results"
+                  style={{ position: "relative", top: "-50px" }}
+                >
+                  No followers yet!
+                </div>
+              )}
+            </section>
+          </>
         )}
         {activeSubView === 3 && (
           <section className="following">

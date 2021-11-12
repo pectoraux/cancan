@@ -43,13 +43,13 @@ export async function createProfile(userId: string, userEmail: string) {
   const profile = {
     collectionNames: [],
     uploadedVideos: [],
-    likedVideos: [],
+    partnerTags: [],
     partners: [],
     followers: [],
     following: [],
     email: userEmail,
   };
-  return firestore
+  return await firestore
     .collection("profiles")
     .doc(userId)
     .set(profile)
@@ -63,7 +63,7 @@ export async function createProfile(userId: string, userEmail: string) {
 }
 
 export async function createCollection(userId: string, name: string) {
-  return firestore
+  return await firestore
     .collection("profiles")
     .doc(userId)
     .update({
@@ -71,8 +71,17 @@ export async function createCollection(userId: string, name: string) {
     });
 }
 
+export async function createCategory(userId: string, name: string) {
+  return await firestore
+    .collection("profiles")
+    .doc(userId)
+    .update({
+      categories: firebase.firestore.FieldValue.arrayUnion(name),
+    });
+}
+
 export async function addUploadedVideo(userId: string, videoInfo: any) {
-  return firestore
+  return await firestore
     .collection("profiles")
     .doc(userId)
     .update({
@@ -91,7 +100,7 @@ export async function createChannel(userId: string, name: string) {
     followers: [],
     following: [],
   };
-  return firestore
+  return await firestore
     .collection("channels")
     .add(channel)
     .then((result) => {
@@ -144,7 +153,7 @@ export async function getUserFromCanister(
 }
 
 export async function getUserProfile(userId: string) {
-  return firestore
+  return await firestore
     .collection("profiles")
     .doc(userId)
     .get()
@@ -158,7 +167,7 @@ export async function getUserProfile(userId: string) {
 }
 
 export async function getUserChannel(channelId: string) {
-  return firestore
+  return await firestore
     .collection("channels")
     .doc(channelId)
     .get()
@@ -215,7 +224,7 @@ export async function getFeedVideo(
 }
 
 export async function getVideoInfo(videoId: string) {
-  return firestore
+  return await firestore
     .collection("videos")
     .doc(videoId)
     .get()
@@ -234,7 +243,7 @@ export async function getProfilePic(userId: string) {
 }
 
 export async function createVideo(videoInit: VideoInit): Promise<string> {
-  return firestore
+  return await firestore
     .collection("videos")
     .add(videoInit)
     .then((result) => {
@@ -251,15 +260,25 @@ export async function follow(
   follower: string,
   willFollow: boolean
 ) {
-  // try {
-  //   await (await CanCan.actor).putProfileFollow(
-  //     userToFollow,
-  //     follower,
-  //     willFollow
-  //   );
-  // } catch (error) {
-  //   console.error(error);
-  // }
+  try {
+    if (willFollow) {
+      return await firestore
+        .collection("profiles")
+        .doc(userToFollow)
+        .update({
+          followers: firebase.firestore.FieldValue.arrayUnion(follower),
+        });
+    } else {
+      return await firestore
+        .collection("profiles")
+        .doc(userToFollow)
+        .update({
+          followers: firebase.firestore.FieldValue.arrayRemove(follower),
+        });
+    }
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export async function like(user: string, videoId: string, willLike: boolean) {

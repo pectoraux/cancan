@@ -25,7 +25,8 @@ export function getVideoInit(
     caption,
     // @ts-ignore
     collectionName,
-    // chunkCount,
+    reviews: [],
+    likes: [],
     // @ts-ignore
     createdAt: timestamp, // motoko is using nanoseconds
     name: collectionName + " " + timestamp,
