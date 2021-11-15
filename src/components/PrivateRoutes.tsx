@@ -84,7 +84,8 @@ export function PrivateRoutes({ location, isAuthenticated }) {
       path: "/settings",
       render: () => (
         <Settings
-          paywalled={userProfile.paywall}
+          partnerPaywall={userProfile.partnerPaywall}
+          followerPaywall={userProfile.followerPaywall}
           followerRequest={userProfile.followerRequest}
         />
       ),

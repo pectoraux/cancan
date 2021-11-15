@@ -190,12 +190,14 @@ export async function handleFollower(
 
 export async function saveSettings(
   userId: string,
+  paywall2: boolean,
   paywall: boolean,
   permissionedFollow: boolean
 ) {
   return await firestore.collection("profiles").doc(userId).update({
     followerRequest: permissionedFollow,
-    paywall: paywall,
+    followerPaywall: paywall,
+    partnerPaywall: paywall2,
   });
 }
 

@@ -92,7 +92,7 @@ export function Discover(props: PropsWithRef<DiscoverProps>) {
   }
 
   return (
-    <main id="discover">
+    <main id="discover" style={{ paddingBottom: "50px" }}>
       <LoadingIndicator
         loadingMessage="Loading videos..."
         isLoading={isLoading}
@@ -136,6 +136,10 @@ export function Discover(props: PropsWithRef<DiscoverProps>) {
           </section>
         ) : (
           <>
+            <section className="new-uploads">
+              <span className="post-text">Tags</span>
+              <div className="video-list">Tag</div>
+            </section>
             <section className="new-uploads">
               <span className="post-text">New for you</span>
               <div className="video-list">

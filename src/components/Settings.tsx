@@ -13,12 +13,13 @@ import { Switch } from "@material-ui/core";
  * Allows selection of a file followed by the option to add a caption before
  * uploading to the canister. Utility functions assist in the data translation.
  */
-export function Settings({ paywalled, followerRequest }) {
+export function Settings({ partnerPaywall, followerPaywall, followerRequest }) {
   const history = useHistory();
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const [paywall, setPaywall] = useState(paywalled);
+  const [paywall, setPaywall] = useState(followerPaywall);
+  const [paywall2, setPaywall2] = useState(partnerPaywall);
   const [permissionedFollow, setPermissionedFollow] = useState(followerRequest);
   const partnerNameRef = useRef<HTMLInputElement>(null);
 
@@ -29,7 +30,7 @@ export function Settings({ paywalled, followerRequest }) {
     setDisabled(true);
 
     setCreating(true);
-    saveSettings(auth.currentUser?.uid!, paywall, permissionedFollow)
+    saveSettings(auth.currentUser?.uid!, paywall2, paywall, permissionedFollow)
       .then(() => {
         setCreating(false);
         setTimeout(() => {
@@ -61,7 +62,18 @@ export function Settings({ paywalled, followerRequest }) {
             )}
             <FormGroup style={{ position: "relative", top: "-100px" }}>
               <FormControlLabel
-                label="ACTIVATE PAYWALL"
+                label="ACTIVATE PARTNERS' PAYWALL"
+                control={
+                  <Switch
+                    defaultChecked={paywall2}
+                    onChange={(e) => {
+                      setPaywall2(e.target.checked);
+                    }}
+                  />
+                }
+              />
+              <FormControlLabel
+                label="ACTIVATE FOLLOWERS' PAYWALL"
                 control={
                   <Switch
                     defaultChecked={paywall}

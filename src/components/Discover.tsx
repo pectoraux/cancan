@@ -137,6 +137,10 @@ export function Discover(props: PropsWithRef<DiscoverProps>) {
         ) : (
           <>
             <section className="new-uploads">
+              <span className="post-text">Tags</span>
+              <div className="video-list">Tag</div>
+            </section>
+            <section className="new-uploads">
               <span className="post-text">New for you</span>
               <div className="video-list">
                 {videos.length > 0 &&

@@ -21,6 +21,7 @@ import shareIcon from "../assets/images/icon-share.png";
 import "./Video.scss";
 import downIcon from "../assets/images/icon-down.png";
 import upIcon from "../assets/images/icon-up.png";
+import ExtraButton from "./ExtraButton";
 
 // The amount of flags a video needs before we blur it out on frontend
 const VIDEO_BLUR_MIN = 1;
@@ -215,6 +216,7 @@ function VideoBase(props: VideoProps) {
         </div> */}
         <div className="feed-control">
           <SwipeableButton />
+          <span style={{ position: "relative", top: "-10px" }}>Pay</span>
         </div>
         <div className="feed-control">
           <img
@@ -259,6 +261,9 @@ function VideoBase(props: VideoProps) {
         <div className="feed-control">
           {/* <FlagButton currentUserId={userId} videoInfo={videoInfo} /> */}
           <FlagButton currentUserId={"userId"} videoInfo={"videoInfo"} />
+        </div>
+        <div className="feed-control">
+          <ExtraButton />
         </div>
       </div>
     </div>
