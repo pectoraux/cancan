@@ -1,142 +1,130 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import * as React from "react";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import Divider from "@material-ui/core/Divider";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import Avatar from "@material-ui/core/Avatar";
+import Typography from "@material-ui/core/Typography";
+import { ThemeUIStyleObject } from "theme-ui";
+import Dialog from "@material-ui/core/Dialog";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import Button from "@material-ui/core/Button";
 
-import FlagButton from "./FlagButton";
-import SuperLikeButton from "./SuperLikeButton";
-import TippingButton from "./TippingButton";
-import { ProfilePic } from "./ProfilePic";
-import { SuperLikeEffect } from "./SuperLikeEffect";
-import {
-  getVideoChunks,
-  getProfilePic,
-  like,
-  superLike,
-  useOnScreen,
-} from "../utils";
-import likeIcon from "../assets/images/icon-like.png";
-import commentIcon from "../assets/images/icon-comment.png";
-import shareIcon from "../assets/images/icon-share.png";
-import "./Video.scss";
-import downIcon from "../assets/images/icon-down.png";
-import upIcon from "../assets/images/icon-up.png";
-
-// The amount of flags a video needs before we blur it out on frontend
-const VIDEO_BLUR_MIN = 1;
-
-interface VideoProps {
-  videoInfo: any;
-  userId: string;
-  userRewardPoints: number;
-  onRefreshUser?: any;
-  isPreview?: boolean;
-  onClose?: () => void;
-}
-
-// Wrapper to allow us to use the same video component for single previews from
-// Profile and Discover, and for all videos in the Feed
-export function Comment() {
-  // const {
-  //   isPreview = false,
-  //   userId,
-  //   userRewardPoints,
-  //   onRefreshUser,
-  //   videoInfo,
-  //   onClose = () => {},
-  // } = props;
-  return (
-    <VideoBase
-      userId={"userId"}
-      userRewardPoints={0}
-      onRefreshUser={() => {}}
-      videoInfo={""}
-      onClose={() => {}}
-    />
-  );
-}
-
-function VideoBase(props: VideoProps) {
-  const {
-    videoInfo,
-    userId,
-    userRewardPoints = 0,
-    isPreview = false,
-    onRefreshUser = () => {},
-    onClose = () => {},
-  } = props;
-  const [play, setPlay] = useState(false);
-  const [videoSourceURL, setVideoSourceURL] = useState<string>();
-  const [userPic, setUserPic] = useState<string>();
-  const [userLikes, setUserLikes] = useState(true); //useState(videoInfo.likes.includes(userId));
-  const [isSuperLiked, setIsSuperLiked] = useState(false);
-  const [toggleCaption, setToggleCaption] = useState(false);
-
-  const videoIsFlagged = false; //videoInfo.abuseFlagCount >= VIDEO_BLUR_MIN;
-
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Load video and uploader profilePic on first mount.
-  useEffect(() => {
-    if (!videoInfo) {
-      return;
-    }
-    // getProfilePic(videoInfo.userId).then((bytes) => {
-    //   if (!bytes) {
-    //     return;
-    //   }
-    //   const picBlob = new Blob([Buffer.from(new Uint8Array(bytes))], {
-    //     type: "image/jpeg",
-    //   });
-    // const pic = URL.createObjectURL('');
-    const pic = "https://jpeg.org/images/jpeg-home.jpg";
-    setUserPic(pic);
-    // });
-
-    return () => videoRef.current?.pause();
-  }, [videoInfo?.videoId]);
-
-  function handleLike() {
-    // like(userId, videoInfo.videoId, !userLikes);
-    setUserLikes((state) => !state);
+declare module "react" {
+  interface Attributes {
+    sx?: ThemeUIStyleObject;
   }
+}
 
-  const isCurrentUser = false; //userId === videoInfo.userId;
-  const videoBlurStyle = videoIsFlagged ? { filter: "blur(20px)" } : {};
+export function Comment({ handleClose, handleClickOpen, open = false }) {
+  const descriptionElementRef = React.useRef<HTMLElement>(null);
+
+  React.useEffect(() => {
+    if (open) {
+      const { current: descriptionElement } = descriptionElementRef;
+      if (descriptionElement !== null) {
+        descriptionElement.focus();
+      }
+    }
+  }, [open]);
 
   return (
-    <div className="video-container">
-      <div className="comment-details">
-        <ProfilePic name={"videoInfo.userId"} profilePic={userPic} />
-        <div
-          style={{ position: "relative", right: "-60px", fontSize: "1.8rem" }}
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      scroll="body"
+      aria-labelledby="scroll-dialog-title"
+      aria-describedby="scroll-dialog-description"
+      style={{ marginTop: "40px" }}
+    >
+      <DialogTitle id="scroll-dialog-title">Reviews</DialogTitle>
+      <DialogContent dividers={false}>
+        <DialogContentText
+          id="scroll-dialog-description"
+          ref={descriptionElementRef}
+          tabIndex={-1}
         >
-          <Link
-            to={isCurrentUser ? `/profile` : `/profiles/${"videoInfo.userId"}`}
+          <List
+            sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
           >
-            @{"videoInfo.userId"}
-          </Link>
-        </div>
-        <div>
-          <div className="">
-            <div
-              className="caption"
-              style={{
-                position: "relative",
-                right: "-70px",
-                color: "gray",
-                width: "300px",
-                display: "block",
-                wordWrap: "break-word",
-              }}
-            >
-              videoInfo.caption videoInfo.captionvideoInfo
-              .captionvideoInfo.captionvideoInfo videoInfo.caption
-              videoInfo.captionvideoInfo .captionvideoInfo.captionvideoInfo
-              videoInfo.caption videoInfo.captionvideoInfo
-              .captionvideoInfo.captionvideoInfo
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            <ListItem alignItems="flex-start">
+              <ListItemAvatar>
+                <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+              </ListItemAvatar>
+              <ListItemText
+                primary="Brunch this weekend?"
+                secondary={
+                  <React.Fragment>
+                    <Typography
+                      sx={{ display: "inline" }}
+                      component="span"
+                      variant="body2"
+                      color="textPrimary"
+                    >
+                      Ali Connors
+                    </Typography>
+                    <br />
+                    {" — I'll be in your neighborhood doing errands this…"}
+                  </React.Fragment>
+                }
+              />
+            </ListItem>
+            <Divider variant="inset" component="li" />
+            <ListItem alignItems="flex-start">
+              <ListItemAvatar>
+                <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
+              </ListItemAvatar>
+              <ListItemText
+                primary="Summer BBQ"
+                secondary={
+                  <React.Fragment>
+                    <Typography
+                      sx={{ display: "inline" }}
+                      component="span"
+                      variant="body2"
+                      color="textPrimary"
+                    >
+                      to Scott, Alex, Jennifer
+                    </Typography>
+                    <br />
+                    {" — Wish I could come, but I'm out of town this…"}
+                  </React.Fragment>
+                }
+              />
+            </ListItem>
+            <Divider variant="inset" component="li" />
+            <ListItem alignItems="flex-start">
+              <ListItemAvatar>
+                <Avatar alt="Cindy Baker" src="/static/images/avatar/3.jpg" />
+              </ListItemAvatar>
+              <ListItemText
+                primary="Oui Oui"
+                secondary={
+                  <React.Fragment>
+                    <Typography
+                      sx={{ display: "inline" }}
+                      component="span"
+                      variant="body2"
+                      color="textPrimary"
+                    >
+                      Sandra Adams
+                    </Typography>
+                    <br />
+                    {" — Do you have Paris recommendations? Have you ever…"}
+                  </React.Fragment>
+                }
+              />
+            </ListItem>
+          </List>
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose}>Close</Button>
+      </DialogActions>
+    </Dialog>
   );
 }

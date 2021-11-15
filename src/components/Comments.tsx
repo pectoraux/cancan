@@ -18,6 +18,14 @@ export function Comments({ user, onUpload }) {
   const [creating, setCreating] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [open, setOpen] = React.useState(false);
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
 
   async function submit(evt: FormEvent) {
     evt.preventDefault();
@@ -41,7 +49,7 @@ export function Comments({ user, onUpload }) {
   }
 
   return (
-    <main id="video-upload-container">
+    <main>
       <LoadingIndicator
         loadingMessage="Creating..."
         completedMessage="Created!"
@@ -53,21 +61,29 @@ export function Comments({ user, onUpload }) {
         </button>
       </header>
       <div
-        style={{
-          overflowY: "auto",
-          height: "370px",
-          maxHeight: "300px",
-          position: "relative",
-          top: "150px",
-        }}
+        style={
+          {
+            // overflowY: "scroll",
+            // maxHeight: "500px",
+            // position: "relative",
+            // top: "30px",
+            // backgroundColor: 'white'
+          }
+        }
       >
-        <Comment />
-        <Comment />
-        <Comment />
-        <Comment />
-        <Comment />
-        <Comment />
-        <Comment />
+        <button
+          type="submit"
+          className="primary medium"
+          onClick={handleClickOpen}
+          style={{ position: "relative", top: "250px", left: "100px" }}
+        >
+          View reviews
+        </button>
+        <Comment
+          handleClose={handleClose}
+          handleClickOpen={handleClickOpen}
+          open={open}
+        />
       </div>
       <form onSubmit={submit}>
         <div className="video-add-details">

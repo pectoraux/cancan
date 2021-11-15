@@ -80,6 +80,154 @@ export async function createCategory(userId: string, name: string) {
     });
 }
 
+export async function createPartnerRequest(
+  email: string,
+  partnerId: string,
+  userId: string,
+  description: string
+) {
+  return await firestore
+    .collection("profiles")
+    .doc(userId)
+    .update({
+      requests: firebase.firestore.FieldValue.arrayUnion(
+        `Partnerships ${email} ${partnerId} ${description}`
+      ),
+    });
+}
+
+export async function createFollowerRequest(
+  email: string,
+  partnerId: string,
+  userId: string
+) {
+  return await firestore
+    .collection("profiles")
+    .doc(userId)
+    .update({
+      requests: firebase.firestore.FieldValue.arrayUnion(
+        `Followers ${email} ${partnerId}`
+      ),
+    });
+}
+
+export async function handlePartnerRequest(
+  accept = true,
+  userId: string,
+  email: string,
+  partnerId: string,
+  description: string
+) {
+  if (!accept) {
+    return await firestore
+      .collection("profiles")
+      .doc(userId)
+      .update({
+        requests: firebase.firestore.FieldValue.arrayRemove(
+          `Partnerships ${email} ${partnerId} ${description}`
+        ),
+      });
+  }
+  return await firestore
+    .collection("profiles")
+    .doc(userId)
+    .update({
+      partners: firebase.firestore.FieldValue.arrayUnion(
+        `${email} ${partnerId} ${description}`
+      ),
+      requests: firebase.firestore.FieldValue.arrayRemove(
+        `Partnerships ${email} ${partnerId} ${description}`
+      ),
+    });
+}
+
+export async function handleFollower(
+  accept: boolean,
+  userId: string,
+  userEmail: string,
+  followerId: string,
+  followerEmail: string
+) {
+  if (!accept) {
+    return await firestore
+      .collection("profiles")
+      .doc(userId)
+      .update({
+        followers: firebase.firestore.FieldValue.arrayRemove(
+          `${followerEmail} ${followerId}`
+        ),
+      })
+      .then(async () => {
+        return await firestore
+          .collection("profiles")
+          .doc(followerId)
+          .update({
+            following: firebase.firestore.FieldValue.arrayRemove(
+              `${userEmail} ${userId}`
+            ),
+          });
+      });
+  }
+  return await firestore
+    .collection("profiles")
+    .doc(userId)
+    .update({
+      followers: firebase.firestore.FieldValue.arrayUnion(
+        `${followerEmail} ${followerId}`
+      ),
+    })
+    .then(async () => {
+      return await firestore
+        .collection("profiles")
+        .doc(followerId)
+        .update({
+          following: firebase.firestore.FieldValue.arrayUnion(
+            `${userEmail} ${userId}`
+          ),
+        });
+    });
+}
+
+export async function saveSettings(
+  userId: string,
+  paywall: boolean,
+  permissionedFollow: boolean
+) {
+  return await firestore.collection("profiles").doc(userId).update({
+    followerRequest: permissionedFollow,
+    paywall: paywall,
+  });
+}
+
+export async function handleFollowerRequest(
+  accept = true,
+  userId: string,
+  email: string,
+  partnerId: string
+) {
+  if (!accept) {
+    return await firestore
+      .collection("profiles")
+      .doc(userId)
+      .update({
+        requests: firebase.firestore.FieldValue.arrayRemove(
+          `${email} ${partnerId}`
+        ),
+      });
+  }
+  return await firestore
+    .collection("profiles")
+    .doc(userId)
+    .update({
+      followers: firebase.firestore.FieldValue.arrayUnion(
+        `${email} ${partnerId}`
+      ),
+      requests: firebase.firestore.FieldValue.arrayRemove(
+        `${email} ${partnerId}`
+      ),
+    });
+}
+
 export async function addUploadedVideo(userId: string, videoInfo: any) {
   return await firestore
     .collection("profiles")

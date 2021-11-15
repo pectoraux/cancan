@@ -69,7 +69,6 @@ export function Feed({
       setIsLoading(true);
       getFeedVideos("tepa").then((videos) => {
         setFeed(videos);
-        // setFeed([videos[0]]);
       });
       setIsLoading(false);
       // })
@@ -78,7 +77,7 @@ export function Feed({
       //   setIsLoading(false);
       // });
     }
-  });
+  }, []);
 
   return (
     <main>

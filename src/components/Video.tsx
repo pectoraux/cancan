@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import FlagButton from "./FlagButton";
 import SuperLikeButton from "./SuperLikeButton";
 import TippingButton from "./TippingButton";
+import SwipeableButton from "./SwipeableButton";
+import ShareButton from "./ShareButton";
 import { ProfilePic } from "./ProfilePic";
 import { SuperLikeEffect } from "./SuperLikeEffect";
 import {
@@ -83,7 +85,7 @@ function VideoBase(props: VideoProps) {
   const videoIsFlagged = false; //videoInfo.abuseFlagCount >= VIDEO_BLUR_MIN;
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  const isVisible = useOnScreen(videoRef);
+  // const isVisible = useOnScreen(videoRef);
 
   const handlePlayClick = function () {
     setPlay(!play);
@@ -113,9 +115,9 @@ function VideoBase(props: VideoProps) {
     return () => videoRef.current?.pause();
   }, [videoInfo?.videoId]);
 
-  useEffect(() => {
-    setPlay(isVisible);
-  }, [isVisible]);
+  // useEffect(() => {
+  //   setPlay(isVisible);
+  // }, [isVisible]);
 
   // Only play video if it has not been flagged/reported
   useEffect(() => {
@@ -154,6 +156,7 @@ function VideoBase(props: VideoProps) {
         ref={videoRef}
         src={videoSourceURL}
         loop={true}
+        autoPlay={false}
         style={videoBlurStyle}
       />
       <div className="user-details">
@@ -202,13 +205,16 @@ function VideoBase(props: VideoProps) {
             {/*currentUser?.totalSuperlikes ||*/ 10}
           </span>
         </div>
-        <div className="feed-control">
+        {/* <div className="feed-control">
           <TippingButton
             senderId={"userId"}
             currentRewardPoints={"userRewardPoints"}
             recipientId={"videoInfo.userId"}
-            onRefreshUser={"onRefreshUser"}
+            onRefreshUser={onRefreshUser}
           />
+        </div> */}
+        <div className="feed-control">
+          <SwipeableButton />
         </div>
         <div className="feed-control">
           <img
@@ -246,11 +252,7 @@ function VideoBase(props: VideoProps) {
           </div>
         </Link>
         <div className="feed-control">
-          <img
-            src={shareIcon}
-            // className={videoInfo.shares?.includes(userId) ? "active" : ""}
-            alt="icon: share current video"
-          />
+          <ShareButton />
           {/* <span>{videoInfo.shares?.length ?? 0}</span> */}
           <span>2</span>
         </div>

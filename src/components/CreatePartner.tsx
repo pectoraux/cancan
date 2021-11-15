@@ -5,19 +5,19 @@ import "./Upload.scss";
 import { uploadProfilePic } from "../utils/video";
 import Select from "react-select";
 import { auth } from "src/utils/firebase";
-import { createCategory, createCollection } from "src/utils";
+import { createPartnerRequest } from "src/utils";
 import backIcon from "../assets/images/icon-back.png";
 import { getUserProfile } from "../utils";
 /*
  * Allows selection of a file followed by the option to add a caption before
  * uploading to the canister. Utility functions assist in the data translation.
  */
-export function CreatePartner({ user }) {
+export function CreatePartner({ partnerId }) {
   const history = useHistory();
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const partnerNameRef = useRef<HTMLInputElement>(null);
+  const partnerDescriptionRef = useRef<HTMLTextAreaElement>(null);
   const [categories, setCategories] = useState([
     { label: "Categories", value: 0 },
   ]);
@@ -43,19 +43,19 @@ export function CreatePartner({ user }) {
     setError("");
     setDisabled(true);
 
-    const partnerName = partnerNameRef?.current?.value!;
-    if (partnerName.trim()) {
-      setCreating(true);
-      createCategory(auth.currentUser?.uid!, partnerName).then(() => {
-        setCreating(false);
-        setTimeout(() => {
-          history.push("/profile");
-        }, 2000);
-      });
-    } else {
-      setError("Name not valid");
-      setDisabled(false);
-    }
+    const partnerDescription = partnerDescriptionRef?.current?.value!;
+    setCreating(true);
+    createPartnerRequest(
+      auth.currentUser?.email!,
+      auth.currentUser?.uid!,
+      partnerId,
+      partnerDescription
+    ).then(() => {
+      setCreating(false);
+      setTimeout(() => {
+        history.push("/profile");
+      }, 2000);
+    });
   }
 
   const customStyles = {
@@ -134,6 +134,12 @@ export function CreatePartner({ user }) {
               })}
             />
             <br />
+            <textarea
+              className="caption-content"
+              ref={partnerDescriptionRef}
+              placeholder="What services do you provide?"
+              rows={6}
+            />
             <button
               type="submit"
               className="primary medium"

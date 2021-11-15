@@ -1,27 +1,30 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ProfilePic } from "./ProfilePic";
-import { PartnerButton } from "./PartnerButton";
+import { RequestButton } from "./RequestButton";
 import "./FollowUserRow.scss";
 import ReactReadMoreReadLess from "react-read-more-read-less";
+import { handlePartnerRequest, handleFollowerRequest } from "src/utils";
 
 /*
  * A single instance of a row in the Followers/Following Profile views. Displays
  * the user's profile picture and username as a link to their profile, along
  * with a button to follow/unfollow that user.
  */
-export function PartnerRow({
+export function RequestRow({
+  userId,
   partnerId,
   partnerEmail,
   partnerDescription,
-  handleFollow = () => {},
+  handleFollow = false,
   following = false,
   disableFollow = true,
 }: {
+  userId: string;
   partnerId: string;
   partnerEmail: string;
   partnerDescription: string;
-  handleFollow?: (partnerId: string, willFollow: boolean) => void;
+  handleFollow?: boolean;
   following?: boolean;
   disableFollow?: boolean;
 }) {
@@ -29,13 +32,39 @@ export function PartnerRow({
 
   // Instead of waiting for the return from the canister update call, we
   // optimistically update the UI
-  function handleFollowClick(event) {
+  function handleAcceptClick(event) {
     event.preventDefault();
     setIsFollowing((state) => !state);
-    handleFollow(partnerId, !isFollowing);
+    if (handleFollow) {
+      handleFollowerRequest(true, userId, partnerEmail, partnerId);
+    } else {
+      handlePartnerRequest(
+        true,
+        userId,
+        partnerEmail,
+        partnerId,
+        partnerDescription
+      );
+    }
   }
 
-  return (
+  function handleRejectClick(event) {
+    event.preventDefault();
+    setIsFollowing((state) => !state);
+    if (handleFollow) {
+      handleFollowerRequest(false, userId, partnerEmail, partnerId);
+    } else {
+      handlePartnerRequest(
+        false,
+        userId,
+        partnerEmail,
+        partnerId,
+        partnerDescription
+      );
+    }
+  }
+
+  return !isFollowing ? (
     <Link to={disableFollow ? "/profile" : `/profiles/${partnerId}`}>
       <div
         className="follow-row"
@@ -52,12 +81,15 @@ export function PartnerRow({
         {disableFollow ? (
           <div />
         ) : (
-          <PartnerButton
+          <RequestButton
             isFollowing={isFollowing}
-            handleFollow={handleFollowClick}
+            handleFollow={handleAcceptClick}
+            handleReject={handleRejectClick}
           />
         )}
       </div>
     </Link>
+  ) : (
+    <div />
   );
 }

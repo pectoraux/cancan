@@ -16,6 +16,7 @@ import { AuthContext } from "src/utils";
 import { auth } from "src/utils/firebase";
 import { CreateCollection } from "./CreateCollection";
 import { CreateCategory } from "./CreateCategory";
+import { Settings } from "./Settings";
 import { CreatePartner } from "./CreatePartner";
 import { getUserProfile } from "src/utils/canister";
 import { NFTickets } from "src/views/NFTickets";
@@ -42,6 +43,10 @@ export function PrivateRoutes({ location, isAuthenticated }) {
       setUserProfile(res);
     });
   }
+
+  useEffect(() => {
+    Promise.all([refreshProfileInfo()]);
+  }, [userProfile]);
 
   const privateRoutes = [
     {
@@ -76,8 +81,19 @@ export function PrivateRoutes({ location, isAuthenticated }) {
       render: () => <CreateCategory user={userProfile} />,
     },
     {
-      path: "/create_partner",
-      render: () => <CreatePartner user={userProfile} />,
+      path: "/settings",
+      render: () => (
+        <Settings
+          paywalled={userProfile.paywall}
+          followerRequest={userProfile.followerRequest}
+        />
+      ),
+    },
+    {
+      path: "/create_partner/:partnerId",
+      render: ({ match }) => (
+        <CreatePartner partnerId={match?.params.partnerId} />
+      ),
     },
     {
       path: "/nftickets",

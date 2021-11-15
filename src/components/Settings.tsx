@@ -4,17 +4,22 @@ import { LoadingIndicator } from "./LoadingIndicator";
 import "./Upload.scss";
 import { uploadProfilePic } from "../utils/video";
 import { auth } from "src/utils/firebase";
-import { createCategory, createCollection } from "src/utils";
+import { saveSettings } from "src/utils";
 import backIcon from "../assets/images/icon-back.png";
+import { FormGroup } from "@material-ui/core";
+import { FormControlLabel } from "@material-ui/core";
+import { Switch } from "@material-ui/core";
 /*
  * Allows selection of a file followed by the option to add a caption before
  * uploading to the canister. Utility functions assist in the data translation.
  */
-export function CreateCategory({ user }) {
+export function Settings({ paywalled, followerRequest }) {
   const history = useHistory();
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
   const [disabled, setDisabled] = useState(false);
+  const [paywall, setPaywall] = useState(paywalled);
+  const [permissionedFollow, setPermissionedFollow] = useState(followerRequest);
   const partnerNameRef = useRef<HTMLInputElement>(null);
 
   async function submit(evt: FormEvent) {
@@ -23,26 +28,22 @@ export function CreateCategory({ user }) {
     setError("");
     setDisabled(true);
 
-    const partnerName = partnerNameRef?.current?.value!;
-    if (partnerName.trim()) {
-      setCreating(true);
-      createCategory(auth.currentUser?.uid!, partnerName).then(() => {
+    setCreating(true);
+    saveSettings(auth.currentUser?.uid!, paywall, permissionedFollow)
+      .then(() => {
         setCreating(false);
         setTimeout(() => {
           history.push("/profile");
         }, 2000);
-      });
-    } else {
-      setError("Name not valid");
-      setDisabled(false);
-    }
+      })
+      .catch((err) => setError("Unable to save. Try again later"));
   }
 
   return (
     <main id="video-upload-container">
       <LoadingIndicator
-        loadingMessage="Creating..."
-        completedMessage="Created!"
+        loadingMessage="Saving..."
+        completedMessage="Saved!"
         isLoading={creating}
       />
       <header style={{ position: "relative", top: "30px" }} id="alt-header">
@@ -58,19 +59,36 @@ export function CreateCategory({ user }) {
                 <span className="message">{error}</span>
               </div>
             )}
-            <input
-              className="caption-content"
-              style={{ width: "100%", fontSize: "20px" }}
-              ref={partnerNameRef}
-              type="text"
-              placeholder="category name"
-            />
+            <FormGroup style={{ position: "relative", top: "-100px" }}>
+              <FormControlLabel
+                label="ACTIVATE PAYWALL"
+                control={
+                  <Switch
+                    defaultChecked={paywall}
+                    onChange={(e) => {
+                      setPaywall(e.target.checked);
+                    }}
+                  />
+                }
+              />
+              <FormControlLabel
+                label="PERMISSIONED FOLLOW"
+                control={
+                  <Switch
+                    defaultChecked={permissionedFollow}
+                    onChange={(e) => {
+                      setPermissionedFollow(e.target.checked);
+                    }}
+                  />
+                }
+              />
+            </FormGroup>
             <button
               type="submit"
               className="primary medium"
               disabled={disabled}
             >
-              Create
+              Save
             </button>
           </div>
         </div>
