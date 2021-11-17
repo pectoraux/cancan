@@ -134,7 +134,7 @@ export function NFTickets({ currentUser }) {
           loadingMessage="Loading profile..."
           isLoading={isLoading}
         />
-        {videoPreview && (
+        {/* {videoPreview && (
           <Video
             userId={userName}
             userRewardPoints={
@@ -145,7 +145,7 @@ export function NFTickets({ currentUser }) {
             onClose={() => setVideoPreview(undefined)}
             key={videoPreview.videoId}
           />
-        )}
+        )} */}
         <div className="profile-header">
           <ProfilePic name={userId} profilePic={profilePic} />
           <h2>

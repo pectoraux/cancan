@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-
+import { LoadingIndicator } from "../components/LoadingIndicator";
 import FlagButton from "./FlagButton";
 import SuperLikeButton from "./SuperLikeButton";
 import TippingButton from "./TippingButton";
@@ -13,6 +13,7 @@ import {
   getProfilePic,
   like,
   superLike,
+  getFeedVideo,
   useOnScreen,
 } from "../utils";
 import likeIcon from "../assets/images/icon-like.png";
@@ -22,13 +23,17 @@ import "./Video.scss";
 import downIcon from "../assets/images/icon-down.png";
 import upIcon from "../assets/images/icon-up.png";
 import ExtraButton from "./ExtraButton";
+import Button from "@mui/material/Button";
+import { Stack } from "@mui/material";
+import { FollowButton } from "./FollowButton";
+import { auth } from "src/utils/firebase";
+import { useHistory } from "react-router-dom";
 
 // The amount of flags a video needs before we blur it out on frontend
 const VIDEO_BLUR_MIN = 1;
 
 interface VideoProps {
   videoInfo: any;
-  userId: string;
   userRewardPoints: number;
   onRefreshUser?: any;
   isPreview?: boolean;
@@ -40,7 +45,6 @@ interface VideoProps {
 export function Video(props: VideoProps) {
   const {
     isPreview = false,
-    userId,
     userRewardPoints,
     onRefreshUser,
     videoInfo,
@@ -50,7 +54,6 @@ export function Video(props: VideoProps) {
     <div className="preview-container">
       <VideoBase
         isPreview
-        userId={userId}
         userRewardPoints={userRewardPoints}
         videoInfo={videoInfo}
         onClose={onClose}
@@ -58,7 +61,6 @@ export function Video(props: VideoProps) {
     </div>
   ) : (
     <VideoBase
-      userId={userId}
       userRewardPoints={userRewardPoints}
       onRefreshUser={onRefreshUser}
       videoInfo={videoInfo}
@@ -70,7 +72,6 @@ export function Video(props: VideoProps) {
 function VideoBase(props: VideoProps) {
   const {
     videoInfo,
-    userId,
     userRewardPoints = 0,
     isPreview = false,
     onRefreshUser = () => {},
@@ -82,11 +83,13 @@ function VideoBase(props: VideoProps) {
   const [userLikes, setUserLikes] = useState(true); //useState(videoInfo.likes.includes(userId));
   const [isSuperLiked, setIsSuperLiked] = useState(false);
   const [toggleCaption, setToggleCaption] = useState(false);
-
+  const [videoData, setVideoData] = useState<any>();
+  const [isLoading, setIsLoading] = useState(false);
+  const history = useHistory();
   const videoIsFlagged = false; //videoInfo.abuseFlagCount >= VIDEO_BLUR_MIN;
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  // const isVisible = useOnScreen(videoRef);
+  const isVisible = useOnScreen(videoRef);
 
   const handlePlayClick = function () {
     setPlay(!play);
@@ -97,10 +100,16 @@ function VideoBase(props: VideoProps) {
     if (!videoInfo) {
       return;
     }
-    getVideoChunks(videoInfo).then((blobURL) => {
+    setIsLoading(true);
+    setVideoData(videoInfo.data());
+    getFeedVideo(videoInfo.id).then((blobURL) => {
       setVideoSourceURL(blobURL);
-      setPlay(true);
+      setIsLoading(false);
+      // setPlay(true);
     });
+    // getVideoInfo(videoInfo.name).then((res) => {
+    //   setVideoInfo(res);
+    // });
     // getProfilePic(videoInfo.userId).then((bytes) => {
     //   if (!bytes) {
     //     return;
@@ -114,7 +123,7 @@ function VideoBase(props: VideoProps) {
     // });
 
     return () => videoRef.current?.pause();
-  }, [videoInfo?.videoId]);
+  }, [videoInfo?.id]);
 
   // useEffect(() => {
   //   setPlay(isVisible);
@@ -125,7 +134,7 @@ function VideoBase(props: VideoProps) {
     if (!videoIsFlagged) {
       play ? videoRef.current?.play() : videoRef.current?.pause();
     }
-  }, [play, videoRef]);
+  }, [play]);
 
   function handleLike() {
     // like(userId, videoInfo.videoId, !userLikes);
@@ -144,6 +153,10 @@ function VideoBase(props: VideoProps) {
 
   return (
     <div className="video-container">
+      <LoadingIndicator
+        loadingMessage="Loading videos..."
+        isLoading={isLoading}
+      />
       <SuperLikeEffect isActive={isSuperLiked} />
       {isPreview && (
         <button
@@ -157,12 +170,17 @@ function VideoBase(props: VideoProps) {
         ref={videoRef}
         src={videoSourceURL}
         loop={true}
+        muted={true}
         autoPlay={false}
         style={videoBlurStyle}
       />
       <div className="user-details">
         <div style={{ position: "relative", top: "-5px", fontSize: "1.8rem" }}>
-          <ProfilePic name={"videoInfo.userId"} profilePic={userPic} />
+          <ProfilePic
+            name={videoData?.userId}
+            profilePic={userPic}
+            clickable={false}
+          />
           <img
             style={{ position: "relative", bottom: "40px", marginLeft: "5px" }}
             src={toggleCaption ? upIcon : downIcon}
@@ -170,10 +188,13 @@ function VideoBase(props: VideoProps) {
             onClick={() => setToggleCaption(!toggleCaption)}
           />
           <Link
-            to={isCurrentUser ? `/profile` : `/profiles/${"videoInfo.userId"}`}
+            to={isCurrentUser ? `/profile` : `/profiles/${videoData?.userId}`}
           >
-            @{"videoInfo.userId"}
+            @{videoData?.userEmail.split("@")[0]}
           </Link>
+          <span style={{ paddingLeft: "10px" }}>
+            <FollowButton isFollowing={false} handleFollow={() => {}} />
+          </span>
         </div>
         <div style={{ position: "relative", top: "-250px" }}>
           <div className="uploader-info">
@@ -186,8 +207,7 @@ function VideoBase(props: VideoProps) {
                 maxHeight: "200px",
               }}
             >
-              {toggleCaption &&
-                "videoInfo.caption videoInfo.captionvideoInfo .captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.captionvideoInfo.caption"}
+              {toggleCaption && videoData?.caption}
             </div>
           </div>
         </div>
@@ -206,14 +226,6 @@ function VideoBase(props: VideoProps) {
             {/*currentUser?.totalSuperlikes ||*/ 10}
           </span>
         </div>
-        {/* <div className="feed-control">
-          <TippingButton
-            senderId={"userId"}
-            currentRewardPoints={"userRewardPoints"}
-            recipientId={"videoInfo.userId"}
-            onRefreshUser={onRefreshUser}
-          />
-        </div> */}
         <div className="feed-control">
           <SwipeableButton />
           <span style={{ position: "relative", top: "-10px" }}>Pay</span>
@@ -226,37 +238,41 @@ function VideoBase(props: VideoProps) {
             src={likeIcon}
             alt="like toggle button"
           />
-          {/* <span>
-            {videoInfo.likes.length +
-              // if they are toggling on and off, only subtract if they are
-              // already a liker it and only add if they are not already a liker
-              (userLikes
-                ? videoInfo.likes.includes(userId)
-                  ? 0
-                  : 1
-                : videoInfo.likes.includes(userId)
-                ? -1
-                : 0)}
-          </span> */}
+          <span>
+            {videoData &&
+              videoData?.likes.length +
+                // if they are toggling on and off, only subtract if they are
+                // already a liker it and only add if they are not already a liker
+                (userLikes
+                  ? videoData.likes.includes(auth.currentUser?.uid)
+                    ? 0
+                    : 1
+                  : videoData.likes.includes(auth.currentUser?.uid)
+                  ? -1
+                  : 0)}
+          </span>
         </div>
-        <Link to="/comments">
+        <Link to={`/comments/${videoInfo?.id}`}>
           <div className="feed-control">
             <img
               src={commentIcon}
               className={
-                // videoInfo.comments?.some((comment) => comment.userId === userId)
-                true ? "active" : ""
+                videoData &&
+                videoData.reviews?.some(
+                  (review) => review.split(" ")[0] === auth.currentUser?.uid
+                )
+                  ? "active"
+                  : ""
               }
-              alt="icon: comment on current video"
+              alt="icon: review on current video"
             />
-            {/* <span>{videoInfo.comments?.length ?? 0}</span> */}
-            <span>2</span>
+            <span>{videoData?.reviews?.length ?? 0}</span>
           </div>
         </Link>
         <div className="feed-control">
           <ShareButton />
           {/* <span>{videoInfo.shares?.length ?? 0}</span> */}
-          <span>2</span>
+          {/* <span>2</span> */}
         </div>
         <div className="feed-control">
           {/* <FlagButton currentUserId={userId} videoInfo={videoInfo} /> */}

@@ -55,6 +55,12 @@ export function PrivateRoutes({ location, isAuthenticated }) {
         <Feed profileInfo={userProfile} onRefreshUser={refreshProfileInfo} />
       ),
     },
+    {
+      path: "/feed_following",
+      render: () => (
+        <Feed profileInfo={userProfile} onRefreshUser={refreshProfileInfo} />
+      ),
+    },
     { path: "/discover", render: () => <Discover profileInfo={userProfile} /> },
     {
       path: "/upload",
@@ -67,9 +73,9 @@ export function PrivateRoutes({ location, isAuthenticated }) {
       ),
     },
     {
-      path: "/comments",
-      render: () => (
-        <Comments onUpload={refreshProfileInfo} user={userProfile} />
+      path: "/comments/:videoId",
+      render: ({ match }) => (
+        <Comments videoId={match?.params.videoId} user={userProfile} />
       ),
     },
     {

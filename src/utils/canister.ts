@@ -39,15 +39,27 @@ export function getUserFromStorage(
   }
 }
 
-export async function createProfile(userId: string, userEmail: string) {
+export async function createProfile(
+  userId: string,
+  userEmail: string,
+  date: string,
+  gender: string
+) {
   const profile = {
     collectionNames: [],
+    categories: [],
+    likedVideos: [],
+    followerPaywall: false,
+    followerRequest: false,
+    partnerPaywall: false,
     uploadedVideos: [],
-    partnerTags: [],
     partners: [],
+    requests: [],
     followers: [],
     following: [],
     email: userEmail,
+    date: date,
+    gender: gender,
   };
   return await firestore
     .collection("profiles")
@@ -349,28 +361,35 @@ export async function getSearchVideos(
   return Promise.resolve([]);
 }
 
-export async function getFeedVideos(
-  userId: string
-): Promise<firebase.storage.Reference[]> {
+export async function getFeedVideos() {
   // Create a reference with an initial file path and name
   var storage = firebase.storage();
   var videos = await (await storage.ref("videos").listAll()).items;
-  // unwrap<VideoResults>(
-  //   await (await CanCan.actor).getFeedVideos(userId, [])
-  // );
+  // var userIds = Array<any>()
+  // var uids = await firestore.collection('videos').get();
+
   return videos;
 }
 
-export async function getFeedVideo(
-  videoId: string
-): Promise<firebase.storage.Reference> {
+export async function getFeedVideo(videoId: string) {
   // Create a reference with an initial file path and name
   var storage = firebase.storage();
   var video = await (await storage.ref("videos")).child(videoId);
   // unwrap<VideoResults>(
   //   await (await CanCan.actor).getFeedVideos(userId, [])
   // );
-  return video;
+  return video.getDownloadURL();
+}
+
+export async function getVideosInfo() {
+  return await firestore
+    .collection("videos")
+    .get()
+    .then((res) => res.docs)
+    .catch((err) => {
+      console.error("no video found", err);
+      return null;
+    });
 }
 
 export async function getVideoInfo(videoId: string) {
@@ -380,6 +399,20 @@ export async function getVideoInfo(videoId: string) {
     .get()
     .then((doc) => {
       return doc.data();
+    })
+    .catch((err) => {
+      console.error("no video found with id: " + videoId, err);
+      return null;
+    });
+}
+
+export async function getComments(videoId: string) {
+  return await firestore
+    .collection("comments")
+    .where("videoId", "==", videoId)
+    .get()
+    .then((res) => {
+      return res.docs;
     })
     .catch((err) => {
       console.error("no video found with id: " + videoId, err);
@@ -457,9 +490,7 @@ export async function getMessages(username: string): Promise<Message[]> {
 }
 
 // Videos are stored as chunked byteArrays, and must be assembled once received
-export async function getVideoChunks(
-  videoInfo: firebase.storage.Reference
-): Promise<string> {
+export async function getVideoChunks(videoInfo: any): Promise<string> {
   return await videoInfo.getDownloadURL();
   // const { fullPath } = videoInfo;
   // const chunkBuffers: Buffer[] = [];

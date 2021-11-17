@@ -14,6 +14,7 @@ import firebase from "firebase";
 // Determines number of chunks and creates the VideoInfo
 export function getVideoInit(
   userId: string,
+  userEmail: string,
   file: File,
   collectionName: string,
   caption: string
@@ -23,6 +24,7 @@ export function getVideoInit(
   return {
     userId,
     caption,
+    userEmail,
     // @ts-ignore
     collectionName,
     reviews: [],
@@ -60,13 +62,20 @@ async function processAndUploadChunk(
 // Wraps up the previous functions into one step for the UI to trigger
 async function uploadVideo(
   userId: string,
+  userEmail: string,
   file: File,
   caption: string,
   collectionName: string
 ) {
   const videoBuffer = (await file?.arrayBuffer()) || new ArrayBuffer(0);
 
-  const videoInit = getVideoInit(userId, file, collectionName, caption);
+  const videoInit = getVideoInit(
+    userId,
+    userEmail,
+    file,
+    collectionName,
+    caption
+  );
   const thumb = await generateThumbnail(file);
   const videoId = await createVideo(videoInit);
   const picUrl = await uploadVideoPic(videoId, thumb);
@@ -192,9 +201,11 @@ async function checkVidFromIC(videoId: string, userId: string) {
 // with "success" to toggle loading states.
 export function useUploadVideo({
   userId,
+  userEmail,
   collectionName,
 }: {
   userId: string;
+  userEmail: string;
   collectionName: string;
 }) {
   const [completedVideo, setCompletedVideo] = useState<any>();
@@ -206,12 +217,16 @@ export function useUploadVideo({
     console.info("Storing video...");
     try {
       console.time("Stored in");
-      uploadVideo(userId, fileToUpload, caption, collectionName).then(
-        async (videoInfo) => {
-          await addUploadedVideo(userId, videoInfo);
-          setCompletedVideo(videoInfo);
-        }
-      );
+      uploadVideo(
+        userId,
+        userEmail,
+        fileToUpload,
+        caption,
+        collectionName
+      ).then(async (videoInfo) => {
+        await addUploadedVideo(userId, videoInfo);
+        setCompletedVideo(videoInfo);
+      });
       setReady(false);
       setFile(undefined);
       console.timeEnd("Stored in");

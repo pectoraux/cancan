@@ -98,14 +98,15 @@ export function Discover(props: PropsWithRef<DiscoverProps>) {
         isLoading={isLoading}
       />
       {videoPreview && profileInfo !== undefined && (
-        <Video
-          userId={profileInfo.userName}
-          userRewardPoints={Number(profileInfo.rewards.toString())}
-          videoInfo={videoPreview}
-          isPreview={true}
-          onClose={() => setVideoPreview(undefined)}
-          key={videoPreview.videoId}
-        />
+        <></>
+        // <Video
+        //   userId={profileInfo.userName}
+        //   userRewardPoints={Number(profileInfo.rewards.toString())}
+        //   videoInfo={videoPreview}
+        //   isPreview={true}
+        //   onClose={() => setVideoPreview(undefined)}
+        //   key={videoPreview.videoId}
+        // />
       )}
 
       <div className="search-container">

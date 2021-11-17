@@ -58,7 +58,7 @@ const video2 = {
 /*
  * Nothing fancy here, either!
  */
-export function Feed({
+export function FeedFollowing({
   profileInfo,
   onRefreshUser,
 }: {

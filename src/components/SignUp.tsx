@@ -6,6 +6,17 @@ import { useHistory } from "react-router";
 import "./SignUp.scss";
 import { Link } from "react-router-dom";
 import { auth } from "src/utils/firebase";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
+import TextField from "@mui/material/TextField";
+import AdapterDateFns from "@mui/lab/AdapterDateFns";
+import LocalizationProvider from "@mui/lab/LocalizationProvider";
+import DatePicker from "@mui/lab/DatePicker";
+import DateField from "react-native-datefield";
+
 /*
  * This component receives the authentication information and queries to see if
  * the principal returned from Identity Service matches an existing userId. If
@@ -21,7 +32,9 @@ export function SignUp() {
   const [isSigningUp, setIsSigningUp] = useState(false);
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
   const history = useHistory();
+  const [gender, setGender] = useState<string>("Other");
 
   // Submit the form to signup with a new username, the backend ensures that
   // the username is available.
@@ -32,11 +45,12 @@ export function SignUp() {
     // Get the username entered from the form.
     const username = usernameInputRef?.current?.value!;
     const password = passwordInputRef?.current?.value!;
+    const date = dateInputRef?.current?.value!;
     setIsSigningUp(true);
     auth
       .createUserWithEmailAndPassword(username, password)
       .then((user) => {
-        createProfile(user.user?.uid || "", username);
+        createProfile(user.user?.uid || "", username, date, gender);
         user.user?.sendEmailVerification().then((result) => {
           setError("A verification email has been sent to your email address.");
         });
@@ -66,9 +80,8 @@ export function SignUp() {
         loadingMessage="Signing up..."
       />
 
-      <form onSubmit={submit}>
+      <form onSubmit={submit} style={{ position: "relative", top: "-60px" }}>
         <img alt="cancan logo" src={logo} style={{ width: "24.2rem" }} />
-
         <div className="username-container">
           <label htmlFor="username">
             <p>Enter a username & password to get started:</p>
@@ -92,8 +105,42 @@ export function SignUp() {
             id="password"
             placeholder="password"
           />
+          <input
+            ref={dateInputRef}
+            type="date"
+            name="date_of_birth"
+            id="date_of_birth"
+            placeholder="date of birth"
+          />
         </div>
-        <button type="submit" id="sign-in" className="primary medium">
+        <RadioGroup
+          style={{ position: "relative", top: "-60px" }}
+          row
+          aria-label="gender"
+          name="row-radio-buttons-group"
+        >
+          <FormControlLabel
+            value="female"
+            control={<Radio onClick={() => setGender("female")} />}
+            label="Female"
+          />
+          <FormControlLabel
+            value="male"
+            control={<Radio onClick={() => setGender("male")} />}
+            label="Male"
+          />
+          <FormControlLabel
+            value="other"
+            control={<Radio onClick={() => setGender("other")} />}
+            label="Other"
+          />
+        </RadioGroup>
+        <button
+          style={{ position: "relative", top: "-80px" }}
+          type="submit"
+          id="sign-in"
+          className="primary medium"
+        >
           Sign Up!
         </button>
       </form>

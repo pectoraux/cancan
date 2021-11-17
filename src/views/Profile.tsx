@@ -44,7 +44,6 @@ export function Profile({ currentUser }) {
   const { userId = currentUser?.uid } = useParams<ProfileByIdParams>();
   const [activeSubView, setActiveSubView] = useState(0);
   const history = useHistory();
-  const { goBack } = useHistory();
 
   const [userProfile, setUserProfile] = useState<any>();
   const [profilePic, setProfilePic] = useState("");
@@ -203,7 +202,7 @@ export function Profile({ currentUser }) {
           loadingMessage="Loading profile..."
           isLoading={isLoading}
         />
-        {videoPreview && (
+        {/* {videoPreview && (
           <Video
             userId={userId}
             userRewardPoints={0}
@@ -212,7 +211,7 @@ export function Profile({ currentUser }) {
             onClose={() => setVideoPreview("")}
             key={videoPreview}
           />
-        )}
+        )} */}
         <div className="profile-header">
           <header id="alt-header">
             {!isCurrentUserProfile ? (
@@ -264,7 +263,7 @@ export function Profile({ currentUser }) {
               ["Partners", partners?.length || 0],
               ["Videos", uploadedVideos?.length || 0],
               ["Followers", followers?.length || 0],
-              ["Following", following?.length || 0],
+              ["Liked", following?.length || 0],
               ["Requests", requests?.length || 0],
             ].map(([label, count], index) => (
               <ProfileNavLink
@@ -328,7 +327,7 @@ export function Profile({ currentUser }) {
             {selectedOption2 === "Categories" && (
               <>
                 <div className="create">
-                  {!isCurrentUserProfile ? (
+                  {isCurrentUserProfile ? (
                     <Link to="/create_category/">
                       <button
                         className="primary"

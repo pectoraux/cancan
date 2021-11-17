@@ -6,7 +6,7 @@ import { CalendarToday, MoreHoriz } from "@material-ui/icons";
 
 const options = [
   {
-    icon: <CalendarToday style={{ paddingRight: "5px" }} />,
+    icon: <CalendarToday style={{ paddingRight: "5px", paddingLeft: "2px" }} />,
     name: "Schedule/Reserve",
   },
 ];

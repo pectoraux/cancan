@@ -32,6 +32,7 @@ export function Upload({
 
   const videoUploadController = useUploadVideo({
     userId: auth.currentUser?.uid || "",
+    userEmail: auth.currentUser?.email || "",
     collectionName: selectedOption,
   });
 
