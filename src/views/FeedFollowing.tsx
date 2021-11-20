@@ -3,14 +3,15 @@ import { getFeedVideos, getVideosInfo } from "../utils";
 import { Video } from "../components/Video";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { ProfileInfoPlus, VideoInfo } from "../utils/canister/typings";
-// import { getAuth } from "@firebase/auth";
+import "../components/LoadingIndicator.scss";
 import { auth } from "src/utils/firebase";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import PersonPinIcon from "@material-ui/icons/PersonPin";
 import { TopNav } from "src/components/TopNav";
-import { array } from "simple-cbor/src/value";
+import { getUserProfile } from "src/utils/canister";
+import { Link } from "react-router-dom";
 
 interface VideoInf {
   userId: string;
@@ -59,14 +60,14 @@ const video2 = {
  * Nothing fancy here, either!
  */
 export function FeedFollowing({
-  profileInfo,
   onRefreshUser,
 }: {
-  profileInfo?: ProfileInfoPlus;
+  profileInfo?: any;
   onRefreshUser: any;
 }) {
   const [feed, setFeed] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [profileInfo, setProfileInfo] = useState<any>();
 
   const [value, setValue] = React.useState(0);
 
@@ -75,42 +76,61 @@ export function FeedFollowing({
   };
 
   useEffect(() => {
-    // if (profileInfo && profileInfo.userName) {
-    if (auth.currentUser?.email) {
+    if (profileInfo && profileInfo?.following) {
       setIsLoading(true);
-      getVideosInfo().then((vInfo) => {
-        var videosInfo = Array<any>();
-        vInfo?.map((videoInfo) => {
-          videosInfo.push(videoInfo);
+      getVideosInfo(profileInfo.following, true)
+        .then((vInfo) => {
+          var videosInfo = Array<any>();
+          vInfo?.map((videoInfo) => {
+            videosInfo.push(videoInfo);
+          });
+          setFeed(videosInfo);
+        })
+        .catch((e) => {
+          console.error(e);
         });
-        setFeed(videosInfo);
-      });
       setIsLoading(false);
-      // })
-      // .catch((e) => {
-      //   console.error(e);
-      //   setIsLoading(false);
-      // });
+    } else {
+      getUserProfile(auth.currentUser?.uid!).then((user) => {
+        if (user) {
+          setProfileInfo(user);
+        }
+      });
     }
-  }, []);
+  }, [profileInfo, profileInfo?.following]);
 
   return (
     <main>
       <LoadingIndicator
-        loadingMessage="Loading videos..."
+        loadingMessage="Not following any channels"
         completedMessage="Videos loaded"
         isLoading={isLoading}
       />
       <TopNav />
       <div className="feed">
-        {feed.map((v) => (
-          <Video
-            key={v.id}
-            videoInfo={v}
-            userRewardPoints={0}
-            onRefreshUser={onRefreshUser}
-          />
-        ))}
+        {profileInfo && profileInfo?.following.length === 0 ? (
+          <div
+            className="LoadingContainerContent"
+            style={{ position: "relative", top: "300px" }}
+          >
+            <Link to={"/feed"}>
+              <h2>
+                Not Following any channels yet.
+                <br />
+                Click to discover new channels
+              </h2>
+            </Link>
+          </div>
+        ) : (
+          feed.map((v) => (
+            <Video
+              key={v.id}
+              videoInfo={v}
+              userRewardPoints={0}
+              onRefreshUser={onRefreshUser}
+            />
+          ))
+        )}
       </div>
     </main>
   );

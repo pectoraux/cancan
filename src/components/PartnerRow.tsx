@@ -34,9 +34,8 @@ export function PartnerRow({
     setIsFollowing((state) => !state);
     handleFollow(partnerId, !isFollowing);
   }
-
   return (
-    <Link to={disableFollow ? "/profile" : `/profiles/${partnerId}`}>
+    <Link to={`/feed_user/${partnerId}`}>
       <div
         className="follow-row"
         style={{ paddingBottom: "90px", paddingTop: "90px" }}

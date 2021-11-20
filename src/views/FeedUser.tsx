@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { getFeedVideos, getVideosInfo } from "../utils";
+import { getFeedVideos, getVideosFromUser } from "../utils";
 import { Video } from "../components/Video";
 import { LoadingIndicator } from "../components/LoadingIndicator";
-import { ProfileInfoPlus, VideoInfo } from "../utils/canister/typings";
 import "../components/LoadingIndicator.scss";
 import { auth } from "src/utils/firebase";
 import { TopNav } from "src/components/TopNav";
@@ -16,20 +15,25 @@ type ProfileByIdParams = {
 /*
  * Nothing fancy here, either!
  */
-export function Feed({
+export function FeedUser({
+  userId,
   onRefreshUser,
 }: {
+  userId: string;
   profileInfo?: any;
   onRefreshUser: any;
 }) {
   const [feed, setFeed] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [profileInfo, setProfileInfo] = useState<any>();
+  const [videoPreview, setVideoPreview] = useState<any>(true);
+  const history = useHistory();
+  const { goBack } = useHistory();
 
   useEffect(() => {
-    if (profileInfo && profileInfo?.following) {
+    if (userId) {
       setIsLoading(true);
-      getVideosInfo()
+      getVideosFromUser(userId)
         .then((vInfo) => {
           var videosInfo = Array<any>();
           vInfo?.map((videoInfo) => {
@@ -48,7 +52,7 @@ export function Feed({
         }
       });
     }
-  }, [profileInfo, profileInfo?.following]);
+  }, [userId]);
 
   return (
     <main>
@@ -57,16 +61,30 @@ export function Feed({
         completedMessage="Videos loaded"
         isLoading={isLoading}
       />
-      <TopNav />
       <div className="feed">
-        {feed.map((v) => (
-          <Video
-            key={v.id}
-            videoInfo={v}
-            userRewardPoints={0}
-            onRefreshUser={onRefreshUser}
-          />
-        ))}
+        {!isLoading && feed && feed?.length === 0 ? (
+          <div
+            className="LoadingContainerContent"
+            style={{ position: "relative", top: "300px" }}
+          >
+            <Link to={"/profile"}>
+              <h2>
+                No videos uploaded by this partner. <br /> Go back!
+              </h2>
+            </Link>
+          </div>
+        ) : (
+          feed.map((v) => (
+            <Video
+              key={v.id}
+              isPreview={true}
+              onClose={goBack}
+              videoInfo={v}
+              userRewardPoints={0}
+              onRefreshUser={onRefreshUser}
+            />
+          ))
+        )}
       </div>
     </main>
   );

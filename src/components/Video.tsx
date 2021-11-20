@@ -11,7 +11,7 @@ import { SuperLikeEffect } from "./SuperLikeEffect";
 import {
   getVideoChunks,
   getProfilePic,
-  like,
+  createLike,
   superLike,
   getFeedVideo,
   useOnScreen,
@@ -80,10 +80,12 @@ function VideoBase(props: VideoProps) {
   const [play, setPlay] = useState(false);
   const [videoSourceURL, setVideoSourceURL] = useState<string>();
   const [userPic, setUserPic] = useState<string>();
-  const [userLikes, setUserLikes] = useState(true); //useState(videoInfo.likes.includes(userId));
   const [isSuperLiked, setIsSuperLiked] = useState(false);
   const [toggleCaption, setToggleCaption] = useState(false);
   const [videoData, setVideoData] = useState<any>();
+  const [userLikes, setUserLikes] = useState(
+    videoData?.likes.includes(auth.currentUser?.uid)
+  );
   const [isLoading, setIsLoading] = useState(false);
   const history = useHistory();
   const videoIsFlagged = false; //videoInfo.abuseFlagCount >= VIDEO_BLUR_MIN;
@@ -102,6 +104,9 @@ function VideoBase(props: VideoProps) {
     }
     setIsLoading(true);
     setVideoData(videoInfo.data());
+    if (videoInfo.data().likes.includes(auth.currentUser?.uid)) {
+      setUserLikes(true);
+    }
     getFeedVideo(videoInfo.id).then((blobURL) => {
       setVideoSourceURL(blobURL);
       setIsLoading(false);
@@ -136,9 +141,9 @@ function VideoBase(props: VideoProps) {
     }
   }, [play]);
 
-  function handleLike() {
-    // like(userId, videoInfo.videoId, !userLikes);
+  async function handleLike() {
     setUserLikes((state) => !state);
+    await createLike(videoData?.userId, videoInfo?.id, !userLikes);
   }
 
   function handleSuperLike() {
@@ -152,7 +157,10 @@ function VideoBase(props: VideoProps) {
   const videoBlurStyle = videoIsFlagged ? { filter: "blur(20px)" } : {};
 
   return (
-    <div className="video-container">
+    <div
+      className="video-container"
+      style={{ position: "relative", top: "30px" }}
+    >
       <LoadingIndicator
         loadingMessage="Loading videos..."
         isLoading={isLoading}
@@ -193,7 +201,7 @@ function VideoBase(props: VideoProps) {
             @{videoData?.userEmail.split("@")[0]}
           </Link>
           <span style={{ paddingLeft: "10px" }}>
-            <FollowButton isFollowing={false} handleFollow={() => {}} />
+            <FollowButton isFollowing={false} userId={videoData?.userId} />
           </span>
         </div>
         <div style={{ position: "relative", top: "-250px" }}>
@@ -226,11 +234,20 @@ function VideoBase(props: VideoProps) {
             {/*currentUser?.totalSuperlikes ||*/ 10}
           </span>
         </div>
-        <div className="feed-control">
+        <div
+          className="feed-control"
+          style={{ position: "relative", top: "10px" }}
+        >
           <SwipeableButton />
-          <span style={{ position: "relative", top: "-10px" }}>Pay</span>
+          <span style={{ position: "relative", top: "-15px" }}>
+            {/* currentUser?.remainingSuperlikes ||*/ 0}/
+            {/*currentUser?.totalSuperlikes ||*/ 10}
+          </span>
         </div>
-        <div className="feed-control">
+        <div
+          className="feed-control"
+          style={{ position: "relative", top: "20px" }}
+        >
           <img
             onClick={handleLike}
             className={userLikes ? "active" : ""}
@@ -252,7 +269,10 @@ function VideoBase(props: VideoProps) {
                   : 0)}
           </span>
         </div>
-        <Link to={`/comments/${videoInfo?.id}`}>
+        <Link
+          to={`/comments/${videoInfo?.id}`}
+          style={{ position: "relative", top: "15px" }}
+        >
           <div className="feed-control">
             <img
               src={commentIcon}
@@ -270,7 +290,7 @@ function VideoBase(props: VideoProps) {
           </div>
         </Link>
         <div className="feed-control">
-          <ShareButton />
+          <ShareButton videoSourceURL={videoSourceURL} />
           {/* <span>{videoInfo.shares?.length ?? 0}</span> */}
           {/* <span>2</span> */}
         </div>

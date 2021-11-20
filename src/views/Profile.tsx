@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useHistory } from "react-router-dom";
-import * as H from "history";
 import { FollowUserRow } from "../components/FollowUserRow";
 import { ProfilePic } from "../components/ProfilePic";
-import { Video } from "../components/Video";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { FollowButton } from "../components/FollowButton";
 import { PartnerRow } from "../components/PartnerRow";
@@ -18,10 +16,7 @@ import {
   formatBigNumber,
 } from "../utils";
 import backIcon from "../assets/images/icon-back.png";
-import cogIcon from "../assets/images/cog-icon.png";
 import "./Profile.scss";
-import { ProfileInfoPlus, VideoInfo } from "../utils/canister/typings";
-// import { getAuth } from "@firebase/auth";
 import { auth } from "src/utils/firebase";
 import Select from "react-select";
 import SettingsIcon from "@material-ui/icons/Settings";
@@ -190,13 +185,6 @@ export function Profile({ currentUser }) {
   } = userProfile ?? {};
   return (
     <>
-      {/* <header style={{ position: "absolute", top: "30px" }} id="alt-header"> */}
-      {/* {isCurrentUserProfile ? ( */}
-      {/* <button id="back" onClick={goBack}>
-            <img src={backIcon} alt="Go Back" />
-          </button>
-        </header> */}
-
       <main>
         <LoadingIndicator
           loadingMessage="Loading profile..."
@@ -252,10 +240,7 @@ export function Profile({ currentUser }) {
                 </button>
               </>
             ) : (
-              <FollowButton
-                isFollowing={isFollowed}
-                handleFollow={handleFollowCurrent}
-              />
+              <FollowButton isFollowing={isFollowed} userId={userId} />
             )}
           </h2>
           <section className="profile-nav">
@@ -376,7 +361,12 @@ export function Profile({ currentUser }) {
                     ))}
                   </div>
                 ) : (
-                  <div className="no-results">No partners yet!</div>
+                  <div
+                    className="no-results"
+                    style={{ position: "relative", top: "-40px" }}
+                  >
+                    No partners yet!
+                  </div>
                 )}
               </section>
             )}

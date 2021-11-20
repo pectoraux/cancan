@@ -1,18 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 import { CSSTransition } from "react-transition-group";
-import { getUserFromCanister } from "../utils";
 import { Feed } from "../views/Feed";
+import { FeedUser } from "../views/FeedUser";
 import { Discover } from "../views/Discover";
 import { Upload } from "./Upload";
 import { UploadProfile } from "./UploadProfile";
-import { Rewards } from "../views/Rewards";
 import { Profile } from "../views/Profile";
 import { DropDayNotification } from "./DropDayNotification";
-import { RewardShowerNotification } from "./RewardShowerNotification";
 import { MainNav } from "./MainNav";
 import { Redirect, Route, Switch } from "react-router-dom";
-import { AuthContext } from "src/utils";
-// import { getAuth } from "@firebase/auth";
 import { auth } from "src/utils/firebase";
 import { CreateCollection } from "./CreateCollection";
 import { CreateCategory } from "./CreateCategory";
@@ -21,6 +17,8 @@ import { CreatePartner } from "./CreatePartner";
 import { getUserProfile } from "src/utils/canister";
 import { NFTickets } from "src/views/NFTickets";
 import { Comments } from "./Comments";
+import { FeedFollowing } from "src/views/FeedFollowing";
+import { Tags } from "./Tags";
 
 function wrapPrivateRouteWithSlide(render) {
   return ({ match }) => (
@@ -56,10 +54,22 @@ export function PrivateRoutes({ location, isAuthenticated }) {
       ),
     },
     {
-      path: "/feed_following",
-      render: () => (
-        <Feed profileInfo={userProfile} onRefreshUser={refreshProfileInfo} />
+      path: "/feed_user/:userId",
+      render: ({ match }) => (
+        <FeedUser
+          userId={match?.params.userId}
+          profileInfo={userProfile}
+          onRefreshUser={refreshProfileInfo}
+        />
       ),
+    },
+    {
+      path: "/tags/:tag",
+      render: ({ match }) => <Tags tag={match?.params.tag} />,
+    },
+    {
+      path: "/feed_following",
+      render: () => <FeedFollowing onRefreshUser={refreshProfileInfo} />,
     },
     { path: "/discover", render: () => <Discover profileInfo={userProfile} /> },
     {

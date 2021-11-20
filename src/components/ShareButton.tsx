@@ -7,8 +7,9 @@ import FileCopy from "@material-ui/icons/FileCopy";
 import CloudDownload from "@material-ui/icons/CloudDownload";
 import "./TippingButton.scss";
 import shareIcon from "../assets/images/icon-share.png";
+import { createDownload } from "src/utils";
 
-export default function ShareButton() {
+export default function ShareButton({ videoSourceURL }) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -20,6 +21,10 @@ export default function ShareButton() {
   const [activeAnimations, setActiveAnimations] = React.useState<number[] | []>(
     []
   );
+
+  async function handleDownload() {
+    await createDownload(videoSourceURL);
+  }
 
   return (
     <div>
@@ -52,7 +57,7 @@ export default function ShareButton() {
           </ListItemIcon>
         </MenuItem>
         <MenuItem onClick={handleClose}>
-          <ListItemIcon>
+          <ListItemIcon onClick={handleDownload}>
             <CloudDownload style={{ paddingRight: "3px" }} fontSize="small" />
             Download
           </ListItemIcon>

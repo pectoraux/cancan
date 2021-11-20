@@ -83,6 +83,78 @@ export async function createCollection(userId: string, name: string) {
     });
 }
 
+export async function createReview(
+  userId: string,
+  userEmail: string,
+  videoId: string,
+  content: string,
+  profilePic: string
+) {
+  const comment = {
+    userId: userId,
+    userEmail: userEmail,
+    videoId: videoId,
+    content: content,
+    profilePic: profilePic,
+  };
+  await firestore
+    .collection("videos")
+    .doc(videoId)
+    .update({
+      reviews: firebase.firestore.FieldValue.arrayUnion(userId),
+    });
+  return await firestore
+    .collection("comments")
+    .add(comment)
+    .then((result) => {
+      return result.id;
+    })
+    .catch((err) => {
+      console.error("error adding review: ", err);
+      return "";
+    });
+}
+
+export async function createLike(
+  userId: string,
+  videoId: string,
+  isLiked: boolean
+) {
+  await firestore
+    .collection("videos")
+    .doc(videoId)
+    .update({
+      likes: isLiked
+        ? firebase.firestore.FieldValue.arrayUnion(userId)
+        : firebase.firestore.FieldValue.arrayRemove(userId),
+    });
+  return await firestore
+    .collection("profiles")
+    .doc(userId)
+    .update({
+      likedVideos: isLiked
+        ? firebase.firestore.FieldValue.arrayUnion(videoId)
+        : firebase.firestore.FieldValue.arrayRemove(videoId),
+    })
+    .catch((err) => {
+      console.error("error liking video: ", err);
+      return "";
+    });
+}
+
+export async function createDownload(url: string) {
+  // var storage = firebase.storage();
+  // var httpsReference = storage.refFromURL(url);
+  var xhr = new XMLHttpRequest();
+  xhr.responseType = "blob";
+  xhr.onload = (event) => {
+    var blob = xhr.response;
+  };
+  xhr.open("GET", url);
+  console.log("downloading...");
+  xhr.send();
+}
+
 export async function createCategory(userId: string, name: string) {
   return await firestore
     .collection("profiles")
@@ -160,42 +232,28 @@ export async function handleFollower(
   followerId: string,
   followerEmail: string
 ) {
-  if (!accept) {
-    return await firestore
-      .collection("profiles")
-      .doc(userId)
-      .update({
-        followers: firebase.firestore.FieldValue.arrayRemove(
-          `${followerEmail} ${followerId}`
-        ),
-      })
-      .then(async () => {
-        return await firestore
-          .collection("profiles")
-          .doc(followerId)
-          .update({
-            following: firebase.firestore.FieldValue.arrayRemove(
-              `${userEmail} ${userId}`
-            ),
-          });
-      });
-  }
   return await firestore
     .collection("profiles")
     .doc(userId)
     .update({
-      followers: firebase.firestore.FieldValue.arrayUnion(
-        `${followerEmail} ${followerId}`
-      ),
+      followers: accept
+        ? firebase.firestore.FieldValue.arrayUnion(
+            `${followerEmail} ${followerId}`
+          )
+        : firebase.firestore.FieldValue.arrayRemove(
+            `${followerEmail} ${followerId}`
+          ),
     })
     .then(async () => {
       return await firestore
         .collection("profiles")
         .doc(followerId)
         .update({
-          following: firebase.firestore.FieldValue.arrayUnion(
-            `${userEmail} ${userId}`
-          ),
+          following: accept
+            ? firebase.firestore.FieldValue.arrayUnion(`${userEmail} ${userId}`)
+            : firebase.firestore.FieldValue.arrayRemove(
+                `${userEmail} ${userId}`
+              ),
         });
     });
 }
@@ -381,11 +439,36 @@ export async function getFeedVideo(videoId: string) {
   return video.getDownloadURL();
 }
 
-export async function getVideosInfo() {
+export async function getVideosInfo(
+  following = Array<string>(),
+  filter = false
+) {
   return await firestore
     .collection("videos")
     .get()
-    .then((res) => res.docs)
+    .then((res) => {
+      if (filter) {
+        return res.docs.filter((vInfo) =>
+          following.includes(vInfo.data().userId)
+        );
+      }
+      console.log("NO FILTER");
+      return res.docs;
+    })
+    .catch((err) => {
+      console.error("no video found", err);
+      return null;
+    });
+}
+
+export async function getVideosFromUser(userId: string) {
+  return await firestore
+    .collection("videos")
+    .where("userId", "==", userId)
+    .get()
+    .then((res) => {
+      return res.docs;
+    })
     .catch((err) => {
       console.error("no video found", err);
       return null;

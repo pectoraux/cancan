@@ -4,7 +4,7 @@ import { LoadingIndicator } from "./LoadingIndicator";
 import "./Upload.scss";
 import { uploadProfilePic } from "../utils/video";
 import { auth } from "src/utils/firebase";
-import { getComments } from "src/utils";
+import { getComments, createReview } from "src/utils";
 import backIcon from "../assets/images/icon-back.png";
 import { Comment } from "./Comment";
 import { Video } from "./Video";
@@ -67,12 +67,18 @@ export function Comments({ user, videoId }) {
     const comment = textAreaRef.current?.value.trim();
     if (comment) {
       setCreating(true);
-      // createCollection(auth.currentUser?.uid!, textAreaRef).then(() => {
-      //   setCreating(false);
-      //   setTimeout(() => {
-      //     history.push("/profile");
-      //   }, 2000);
-      // });
+      createReview(
+        auth.currentUser?.uid!,
+        auth.currentUser?.email!,
+        videoId,
+        comment,
+        auth.currentUser?.photoURL!
+      ).then(() => {
+        setCreating(false);
+        setTimeout(() => {
+          history.push("/feed");
+        }, 2000);
+      });
     } else {
       setError("Name not valid");
       setDisabled(false);

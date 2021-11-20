@@ -22,7 +22,10 @@ export default function SwipeableButton() {
   );
 
   return (
-    <div>
+    <div style={{ padding: "0" }}>
+      <span style={{ position: "relative", top: "15px", left: "93px" }}>
+        Pay
+      </span>
       <Button
         id="basic-button"
         aria-controls="basic-menu"

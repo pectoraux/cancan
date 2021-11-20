@@ -2,15 +2,16 @@ import React, { PropsWithRef, useEffect, useRef, useState } from "react";
 import debounce from "lodash.debounce";
 import { ProfileInfoPlus, VideoInfo } from "../utils/canister/typings";
 import { SearchVideoItem } from "../components/SearchVideoItem";
-import { Video } from "../components/Video";
-import { getSearchVideos } from "../utils";
 import { LoadingIndicator } from "../components/LoadingIndicator";
-import "./Discover.scss";
-import TagChips from "../components/TagChips";
+import "../views/Discover.scss";
+// import backIcon from "../assets/images/icon-back.png";
+import { useHistory } from "react-router-dom";
+import ArrowBack from "@material-ui/icons/ArrowBack";
 
 interface DiscoverProps {
   profileInfo?: ProfileInfoPlus;
 }
+
 interface VideoInf {
   userId: string;
   name: string;
@@ -58,9 +59,8 @@ const video2 = {
  * Allows searching for and viewing videos. Nothing especially fancy here, just
  * the typical debounced input fetching data on change.
  */
-export function Discover(props: PropsWithRef<DiscoverProps>) {
-  const { profileInfo } = props;
-
+export function Tags({ tag }) {
+  const history = useHistory();
   const [videos, setVideos] = useState<VideoInf[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [videoPreview, setVideoPreview] = useState<VideoInf>();
@@ -71,8 +71,7 @@ export function Discover(props: PropsWithRef<DiscoverProps>) {
   }
 
   useEffect(() => {
-    // if (profileInfo) {
-    if (true) {
+    if (tag) {
       setLoading(true);
       // getSearchVideos(profileInfo.userName, searchTerm.split(/\W+/), [10]).then(
       //   (searchedVideos) => {
@@ -81,7 +80,7 @@ export function Discover(props: PropsWithRef<DiscoverProps>) {
       // }
       // );
     }
-  }, [searchTerm, profileInfo]);
+  }, [searchTerm, tag]);
 
   const searchRef = useRef<HTMLInputElement>(null);
   const debouncedChangeHandler = debounce(function () {
@@ -93,22 +92,11 @@ export function Discover(props: PropsWithRef<DiscoverProps>) {
   }
 
   return (
-    <main id="discover" style={{ paddingBottom: "50px" }}>
+    <main id="discover">
       <LoadingIndicator
         loadingMessage="Loading videos..."
         isLoading={isLoading}
       />
-      {videoPreview && profileInfo !== undefined && (
-        <></>
-        // <Video
-        //   userId={profileInfo.userName}
-        //   userRewardPoints={Number(profileInfo.rewards.toString())}
-        //   videoInfo={videoPreview}
-        //   isPreview={true}
-        //   onClose={() => setVideoPreview(undefined)}
-        //   key={videoPreview.videoId}
-        // />
-      )}
 
       <div className="search-container">
         <label hidden htmlFor="search">
@@ -124,6 +112,15 @@ export function Discover(props: PropsWithRef<DiscoverProps>) {
           placeholder="Search"
         />
       </div>
+      <ArrowBack
+        onClick={() => history.push("/discover")}
+        style={{
+          cursor: "pointer",
+          position: "relative",
+          top: "-25px",
+          left: "15px",
+        }}
+      ></ArrowBack>
       <div className="featured-container">
         {searchTerm ? (
           <section className="video-list search">
@@ -139,31 +136,20 @@ export function Discover(props: PropsWithRef<DiscoverProps>) {
         ) : (
           <>
             <section className="new-uploads">
-              <span className="post-text">Tags</span>
-              <div className="video-list">
-                <TagChips />
-              </div>
+              <span
+                className="post-text"
+                style={{ position: "relative", left: "140px" }}
+              >
+                Searching tag
+              </span>
             </section>
             <section className="new-uploads">
-              <span className="post-text">New for you</span>
-              <div className="video-list">
+              <span className="post-text">{tag}</span>
+              <div className="video-list" style={{ minHeight: "390px" }}>
                 {videos.length > 0 &&
                   videos.map((v) => (
                     <SearchVideoItem
                       key={v.videoId + "-newUploads"}
-                      onClick={handleClick}
-                      video={v}
-                    />
-                  ))}
-              </div>
-            </section>
-            <section className="viral">
-              <span className="post-text">Trending</span>
-              <div className="video-list">
-                {videos.length > 0 &&
-                  videos.map((v) => (
-                    <SearchVideoItem
-                      key={v.videoId + "-viral"}
                       onClick={handleClick}
                       video={v}
                     />
