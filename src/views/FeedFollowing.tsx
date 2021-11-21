@@ -127,7 +127,7 @@ export function FeedFollowing({
               key={v.id}
               videoInfo={v}
               userRewardPoints={0}
-              onRefreshUser={onRefreshUser}
+              profileInfo={profileInfo}
             />
           ))
         )}

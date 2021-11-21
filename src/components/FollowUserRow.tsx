@@ -38,7 +38,11 @@ export function FollowUserRow({
         {disableFollow ? (
           <div />
         ) : (
-          <FollowButton isFollowing={isFollowing} userId={userName} />
+          <FollowButton
+            isFollowing={isFollowing}
+            setIsFollowing={setIsFollowing}
+            userId={userName}
+          />
         )}
       </div>
     </Link>

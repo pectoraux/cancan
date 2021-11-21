@@ -35,7 +35,7 @@ const VIDEO_BLUR_MIN = 1;
 interface VideoProps {
   videoInfo: any;
   userRewardPoints: number;
-  onRefreshUser?: any;
+  profileInfo?: any;
   isPreview?: boolean;
   onClose?: () => void;
 }
@@ -46,7 +46,7 @@ export function Video(props: VideoProps) {
   const {
     isPreview = false,
     userRewardPoints,
-    onRefreshUser,
+    profileInfo,
     videoInfo,
     onClose = () => {},
   } = props;
@@ -62,7 +62,7 @@ export function Video(props: VideoProps) {
   ) : (
     <VideoBase
       userRewardPoints={userRewardPoints}
-      onRefreshUser={onRefreshUser}
+      profileInfo={profileInfo}
       videoInfo={videoInfo}
       onClose={onClose}
     />
@@ -74,12 +74,13 @@ function VideoBase(props: VideoProps) {
     videoInfo,
     userRewardPoints = 0,
     isPreview = false,
-    onRefreshUser = () => {},
+    profileInfo,
     onClose = () => {},
   } = props;
   const [play, setPlay] = useState(false);
   const [videoSourceURL, setVideoSourceURL] = useState<string>();
   const [userPic, setUserPic] = useState<string>();
+  const [isFollowing, setIsFollowing] = useState(false);
   const [isSuperLiked, setIsSuperLiked] = useState(false);
   const [toggleCaption, setToggleCaption] = useState(false);
   const [videoData, setVideoData] = useState<any>();
@@ -106,6 +107,13 @@ function VideoBase(props: VideoProps) {
     setVideoData(videoInfo.data());
     if (videoInfo.data().likes.includes(auth.currentUser?.uid)) {
       setUserLikes(true);
+    }
+    if (
+      profileInfo.following.filter(
+        (str) => str.split(" ")[1] === videoInfo.data().userId
+      ).length > 0
+    ) {
+      setIsFollowing(true);
     }
     getFeedVideo(videoInfo.id).then((blobURL) => {
       setVideoSourceURL(blobURL);
@@ -153,7 +161,7 @@ function VideoBase(props: VideoProps) {
     }
   }
 
-  const isCurrentUser = false; //userId === videoInfo.userId;
+  const isCurrentUser = videoData?.userId === auth.currentUser?.uid;
   const videoBlurStyle = videoIsFlagged ? { filter: "blur(20px)" } : {};
 
   return (
@@ -200,9 +208,15 @@ function VideoBase(props: VideoProps) {
           >
             @{videoData?.userEmail.split("@")[0]}
           </Link>
-          <span style={{ paddingLeft: "10px" }}>
-            <FollowButton isFollowing={false} userId={videoData?.userId} />
-          </span>
+          {!isCurrentUser && (
+            <span style={{ paddingLeft: "10px" }}>
+              <FollowButton
+                isFollowing={isFollowing}
+                setIsFollowing={setIsFollowing}
+                userId={videoData?.userId}
+              />
+            </span>
+          )}
         </div>
         <div style={{ position: "relative", top: "-250px" }}>
           <div className="uploader-info">

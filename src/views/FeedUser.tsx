@@ -81,7 +81,7 @@ export function FeedUser({
               onClose={goBack}
               videoInfo={v}
               userRewardPoints={0}
-              onRefreshUser={onRefreshUser}
+              profileInfo={profileInfo}
             />
           ))
         )}

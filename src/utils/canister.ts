@@ -232,7 +232,9 @@ export async function handleFollower(
   followerId: string,
   followerEmail: string
 ) {
-  return await firestore
+  console.log("CLICKED ==> ");
+  console.log(accept, userId, userEmail, followerId, followerEmail);
+  await firestore
     .collection("profiles")
     .doc(userId)
     .update({
@@ -244,8 +246,9 @@ export async function handleFollower(
             `${followerEmail} ${followerId}`
           ),
     })
-    .then(async () => {
-      return await firestore
+    .then(async (res) => {
+      console.log(res);
+      await firestore
         .collection("profiles")
         .doc(followerId)
         .update({
@@ -255,6 +258,9 @@ export async function handleFollower(
                 `${userEmail} ${userId}`
               ),
         });
+    })
+    .catch((err) => {
+      console.error(err);
     });
 }
 

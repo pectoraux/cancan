@@ -45,11 +45,7 @@ export function Profile({ currentUser }) {
   const [videoPreview, setVideoPreview] = useState<any>();
   const [isLoading, setLoading] = useState(false);
 
-  const currentUserFollows = [];
-  // currentUser?.following.map(({ userName }) => userName) || [];
-  const initialIsFollowed = false;
-  // currentUserFollows.indexOf(userId || "") !== -1;
-  const [isFollowed, setIsFollowed] = useState(initialIsFollowed);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [actions, setActions] = useState([{ label: "Collections", value: 0 }]);
   const [gender, setGender] = useState([
     { label: "Genders", value: 0 },
@@ -82,7 +78,7 @@ export function Profile({ currentUser }) {
         const followQuery = res?.followers.filter((elt) =>
           elt.startsWith(`${auth.currentUser?.email}`)
         );
-        setIsFollowed(followQuery.length > 0);
+        setIsFollowing(followQuery.length > 0);
         let arr = [{ label: "Collections", value: 0 }];
         let arr2 = [{ label: "Categories", value: 0 }];
         res?.collectionNames?.map((val, idx) => {
@@ -128,16 +124,16 @@ export function Profile({ currentUser }) {
     follow(userToFollow, currentUser?.userName || "", willFollow);
   }
 
-  function handleFollowCurrent() {
-    setIsFollowed((state) => !state);
-    handleFollower(
-      !isFollowed,
-      userId,
-      userProfile?.email!,
-      auth.currentUser?.email!,
-      auth.currentUser?.uid!
-    );
-  }
+  // function handleFollowCurrent() {
+  //   setIsFollowed((state) => !state);
+  //   handleFollower(
+  //     !isFollowed,
+  //     userId,
+  //     userProfile?.email!,
+  //     auth.currentUser?.email!,
+  //     auth.currentUser?.uid!
+  //   );
+  // }
 
   const customStyles = {
     option: (provided, state) => ({
@@ -240,7 +236,11 @@ export function Profile({ currentUser }) {
                 </button>
               </>
             ) : (
-              <FollowButton isFollowing={isFollowed} userId={userId} />
+              <FollowButton
+                isFollowing={isFollowing}
+                setIsFollowing={setIsFollowing}
+                userId={userId}
+              />
             )}
           </h2>
           <section className="profile-nav">

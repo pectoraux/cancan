@@ -3,7 +3,7 @@ import "./FollowButton.scss";
 import { auth, getUserProfile } from "src/utils";
 import { handleFollower, handleFollowerRequest } from "src/utils";
 
-export function FollowButton({ isFollowing, userId }) {
+export function FollowButton({ isFollowing, setIsFollowing, userId }) {
   const [followerRequest, setFollowRequest] = React.useState(false);
   const [userEmail, setUserEmail] = React.useState("");
   getUserProfile(userId).then((res) => {
@@ -11,16 +11,17 @@ export function FollowButton({ isFollowing, userId }) {
     setFollowRequest(res?.followerRequest);
   });
   function handleFollowClick() {
+    setIsFollowing((state) => !state);
     if (followerRequest) {
       handleFollowerRequest(
-        isFollowing,
+        !isFollowing,
         userId,
         auth.currentUser?.email!,
         auth.currentUser?.uid!
       );
     } else {
       handleFollower(
-        isFollowing,
+        !isFollowing,
         userId,
         userEmail,
         auth.currentUser?.uid!,
