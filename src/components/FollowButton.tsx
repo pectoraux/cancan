@@ -1,7 +1,11 @@
 import React from "react";
 import "./FollowButton.scss";
-import { auth, getUserProfile } from "src/utils";
-import { handleFollower, handleFollowerRequest } from "src/utils";
+import {
+  auth,
+  getUserProfile,
+  handleFollower,
+  handleFollowerRequest,
+} from "src/utils";
 
 export function FollowButton({ isFollowing, setIsFollowing, userId }) {
   const [followerRequest, setFollowRequest] = React.useState(false);

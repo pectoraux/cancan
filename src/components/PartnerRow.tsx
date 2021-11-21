@@ -11,52 +11,47 @@ import ReactReadMoreReadLess from "react-read-more-read-less";
  * with a button to follow/unfollow that user.
  */
 export function PartnerRow({
+  userId,
   partnerId,
   partnerEmail,
   partnerDescription,
-  handleFollow = () => {},
-  following = false,
   disableFollow = true,
 }: {
+  userId: string;
   partnerId: string;
   partnerEmail: string;
   partnerDescription: string;
-  handleFollow?: (partnerId: string, willFollow: boolean) => void;
-  following?: boolean;
   disableFollow?: boolean;
 }) {
-  const [isFollowing, setIsFollowing] = useState(following);
-
-  // Instead of waiting for the return from the canister update call, we
-  // optimistically update the UI
-  function handleFollowClick(event) {
-    event.preventDefault();
-    setIsFollowing((state) => !state);
-    handleFollow(partnerId, !isFollowing);
-  }
   return (
-    <Link to={`/feed_user/${partnerId}`}>
-      <div
-        className="follow-row"
-        style={{ paddingBottom: "90px", paddingTop: "90px" }}
-      >
-        <ProfilePic profilePic="" name={partnerId} clickable={false} />
-        <span
-          className="username"
-          style={{ display: "block", fontSize: "10px" }}
+    <>
+      <Link to={`/feed_user/${partnerId}`}>
+        <div
+          className="follow-row"
+          style={{ paddingBottom: "90px", paddingTop: "90px" }}
         >
-          <span style={{ font: "caption" }}> {partnerEmail} </span> <br />
-          {partnerDescription}
-        </span>
+          <ProfilePic profilePic="" name={partnerId} clickable={false} />
+          <span
+            className="username"
+            style={{ display: "block", fontSize: "10px" }}
+          >
+            <span style={{ font: "caption" }}> {partnerEmail} </span> <br />
+            {partnerDescription}
+          </span>
+        </div>
+      </Link>
+      <div style={{ position: "relative", top: "-100px", marginLeft: "300px" }}>
         {disableFollow ? (
           <div />
         ) : (
           <PartnerButton
-            isFollowing={isFollowing}
-            handleFollow={handleFollowClick}
+            key={partnerEmail}
+            partnerId={partnerId}
+            partnerEmail={partnerEmail}
+            description={partnerDescription}
           />
         )}
       </div>
-    </Link>
+    </>
   );
 }

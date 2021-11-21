@@ -89,8 +89,8 @@ export function Profile({ currentUser }) {
         });
         setActions(arr);
         setCategories(arr2);
-        setSelectedOption(arr[0].label);
-        setSelectedOption2(arr2[0].label);
+        setSelectedOption(arr.length > 1 ? arr[1].label : arr[0].label);
+        setSelectedOption2(arr2.length > 1 ? arr2[1].label : arr2[0].label);
       });
     } catch (error) {
       console.error(
@@ -346,17 +346,16 @@ export function Profile({ currentUser }) {
                     {partners.map((partner) => (
                       <PartnerRow
                         key={partner.split(" ", 3)[1]}
+                        userId={userId ? userId : auth.currentUser?.uid}
                         partnerId={partner.split(" ", 3)[1]}
                         partnerEmail={partner.split(" ", 3)[0]}
                         partnerDescription={partner
                           .split(" ")
                           .slice(2)
                           .join(" ")}
-                        handleFollow={handleFollow}
-                        following={false}
-                        disableFollow={false}
-                        // following={currentUserFollows.includes(partner.userName)}
-                        // disableFollow={partner.userName === currentUser?.userName}
+                        disableFollow={
+                          userId ? userId !== auth.currentUser?.uid : false
+                        }
                       />
                     ))}
                   </div>

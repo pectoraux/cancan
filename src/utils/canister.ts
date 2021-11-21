@@ -225,6 +225,23 @@ export async function handlePartnerRequest(
     });
 }
 
+export async function handlePartnerRemove(
+  userId: string,
+  partnerId: string,
+  partnerEmail: string,
+  description: string
+) {
+  return await firestore
+    .collection("profiles")
+    .doc(userId)
+    .update({
+      partners: firebase.firestore.FieldValue.arrayRemove(
+        `${partnerEmail} ${partnerId} ${description}`
+      ),
+    })
+    .catch((err) => console.error(err));
+}
+
 export async function handleFollower(
   accept: boolean,
   userId: string,
